@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Contracts\**" />
+    <Compile Remove="Domain\**" />
+    <EmbeddedResource Remove="Contracts\**" />
+    <EmbeddedResource Remove="Domain\**" />
+    <None Remove="Contracts\**" />
+    <None Remove="Domain\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.0" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.2" />
+    <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
+    
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.0" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Application\UseCases\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\Faster.Modulith.Shared\Faster.Modulith.Shared.csproj" />
+    <ProjectReference Include="..\..\Module.Facilities\Module.Facilities\Module.Facilities.csproj" />
+    <ProjectReference Include="..\..\Module.IdentityAccess\Module.IdentityAccess.Api\Module.IdentityAccess.Api.csproj" />
+    <ProjectReference Include="..\Module.HumanResources.Api\Module.HumanResources.Api.csproj" />
+  </ItemGroup>
+</Project>
+

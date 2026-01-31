@@ -8,16 +8,23 @@
 **Ensuring the final feature is implemented as seamlessly as the first.**
 
 ---
-
 ## 📖 Table of Contents
 - [The Tragedy of Good Intentions](#the-tragedy-of-good-intentions)
 - [The "Vault" Architecture](#the-vault-architecture)
+- [The 3 Laws of Vault](#the-3-laws-of-vault)
 - [How It Works](#how-it-works)
-- [Getting Started](#getting-started-in-60-seconds)
+- [Getting Started (In 60 Seconds)](#getting-started-in-60-seconds)
+    - [1. The "Lazy" Way: CreateModule.cmd](#1-the-lazy-way-createmodulecmd)
+    - [2. The Manual Way: Required Packages](#2-the-manual-way-required-packages)
+- [Implementation Steps](#implementation-steps)
+    - [Step 1: Define your Key (in .Api)](#step-1-define-your-key-in-api)
+    - [Step 2: Implement the Logic (in .Module)](#step-2-implement-the-logic-in-module)
+    - [Step 3: Wire it up (in Program.cs)](#step-3-wire-it-up-in-programcs)
 - [The Enforcer (Analyzers)](#the-enforcer-analyzers)
-- [The Magician (Generators)](#the-magician-generators--dx)
-- [Project Structure](#project-structure-the-law)
-
+- [The Magician (Generators & DX)](#the-magician-generators--dx)
+- [Project Structure](#project-structure)
+- [The Escape Hatch: `[ArchitectureBypass]`](#the-escape-hatch-architecturebypass)
+- [Pipeline Behavior](#pipeline-behavior)
 ---
 
 ## The Tragedy of Good Intentions
@@ -94,50 +101,103 @@ It relies on the only thing that actually stops a developer: **The Red Squiggly 
 
 ## Getting Started (In 60 Seconds)
 
-We do not believe in manual setup. We believe in scripts.
+We do not believe in manual setup. We believe in scripts. Before you write a single line of code, understand the goal: moving from a tangled "Spaghetti Monolith" to a system of **Unbreakable Modules** where boundaries are enforced by the compiler.
 
 ### 1. The "Lazy" Way: CreateModule.cmd
-Do not create projects manually. Use our CLI helper to scaffold the "Vault" structure perfectly every time.
+Do not create projects manually. Use our CLI helper to scaffold the **Vault** structure perfectly every time. This ensures your projects are born with the correct "DNA" and analyzer references [cite: 2026-01-28].
 
 ```powershell
-# Creates Module.HumanResources, Module.HumanResources.Api, and Module.HumanResources.Tests
+# Scaffolds Module.HumanResources, Module.HumanResources.Api, and Module.HumanResources.Tests
 .\CreateModule.cmd HumanResources
 ```
+## 2. The Manual Way: Required Packages
 
-### 2. Define your Key (in .Api)
-Open your new `.Api` project. Create a record. This is your **Key**.
+If you choose not to use the batch file, you must manually add the following references to both your **.Api** and **.Module** projects to enable the generator, contracts, and architectural guardrails:
+
+### In your .Api AND .Module Projects:
+
+```xml
+<ItemGroup>
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.0" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.0" />
+</ItemGroup>
+```
+
+## Step 1: Define your Key (in .Api)
+
+Open your new **.Api** project and create a record. This record serves as your **Key**, defining the entry point to your module. Ensure you use the required contracts namespace for all `IUsecase` types.
+
+### Project: Module.HumanResources.Api
 
 ```csharp
-// Project: Module.HumanResources.Api
-using Faster.Modulith.Contracts;
+using NL.MinDef.LandIT.EventBus.Contracts;
+
+namespace Module.HumanResources.Api;
 
 public record HireEmployeeUseCase(string Name, decimal Salary) : IUsecase<Result<Guid>>;
 ```
 
-### 3. Implement the Logic (in .Module)
-Open the `.Module` project and create a class. Do not manually type the interface; allow the CodeFix to handle the implementation.
+## Step 2: Implement the Logic (in .Module)
+
+Open the **.Module** project and create a class. This class acts as your **Vault**. To maintain strict architectural boundaries, the class must be marked as **internal**. Do not manually type the interface; utilize the **CodeFix** to scaffold the implementation.
+
+---
+
+### Project: Module.HumanResources
 
 ```csharp
-// Project: Module.HumanResources
-internal sealed class HireEmployeeHandler 
+using Module.HumanResources.Api;
+using Faster.Modulith.Contracts;
+
+namespace Module.HumanResources;
+
+internal sealed class HireEmployeeHandler : IUseCaseHandler<HireEmployeeUseCase, Result<Guid>>
 {
-    // A lightbulb suggestion will appear to "Implement Handler for HireEmployeeUseCase"
-    // The Apply/Handle method is scaffolded automatically.
+    /// <summary>
+    /// Handles the HireEmployeeUseCase request.
+    /// </summary>
+    /// <param name="usecase">The usecase data.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A Result containing the Guid of the hired employee.</returns>
+    public async Task<Result<Guid>> Handle(HireEmployeeUseCase usecase, CancellationToken cancellationToken)
+    {
+        // 2026-01-31 13:10:36 - Implementation logic initiated
+        return await Task.FromResult(Result<Guid>.Success(Guid.NewGuid()));
+    }
 }
 ```
 
-### 4. Wire it up (in Program.cs)
-Registration is simplified to one line per module. These extension methods are generated automatically by the source generator to ensure all internal services and dispatchers are correctly registered.
+## Step 3: Wire it up (in Program.cs)
+
+Registration is simplified to one line per module. These extension methods are generated automatically to ensure all internal services and dispatchers are correctly registered—even if no usecases currently exist.
+
+**Crucial:** To ensure consistency, every piece of generated code—from dispatchers to extension methods—resides strictly in the `Faster.Modulith` namespace.
+
+---
+
+### Project: Main Host
 
 ```csharp
-using Faster.Modulith; 
+// 2026-01-31 13:11:30 - Registering module services
+using Faster.Modulith;
 
-var builder = WebApplication.CreateBuilder(args);
+// The generated extension method resides in the Faster.Modulith namespace
+builder.Services.AddHumanResourcesModule();
 
-// These methods are generated automatically
-builder.Services.AddHumanResourcesModule(); 
-builder.Services.AddFacilitiesModule();
 ```
+
+The Source Generator acts as the architect, automatically splitting your logic into the correct structural files. This ensures the public Facade remains the only entry point, while the Dispatcher handles internal traffic.
+
+What goes where?
+Module.g.cs (Public Entrypoint): Contains the HumanResourceModule : IHumanResourceModule. This is the "Front Door." It handles IUsecaseHandler mappings and IEventHandler publishing logic. [cite: 2026-01-10]
+
+Dispatcher.g.cs (Internal Communication): An internal class that handles private cross-module routing. This is where ICommandHandler implementations are registered. It is inaccessible from outside the module and is generated even if the module is empty to ensure stable DI [cite: 2026-01-08].
+
+Extensions.g.cs: Contains the IServiceCollection logic to register all handlers and generated types automatically. All code in this file is generated into the Faster.Modulith namespace.
+
+![Show_Generated_Files](assets/generated.png)
+
+---
 
 ## The "Enforcer" (Analyzers)
 
@@ -155,13 +215,11 @@ We include a suite of Roslyn Analyzers that act as your strict architectural bod
 
 The image captures the **MOD005** analyzer in action, blocking an attempt to use a type that belongs to a different module's internal scope. By triggering a hard compiler error, the framework physically prevents cross-module coupling before the code can even be built. This ensures the "Vault" remains impenetrable, forcing developers to use the official API rather than taking the path of least resistance.
 
-
 ![IDE screenshot demonstrating the MOD005 analyzer error enforcing strict isolation](assets/ruleset.png)
 
 ## The "Magician" (Generators & DX)
 
 In most Modular Monoliths, calling another module is a nightmare of "Search Hell." You have to search through 50 folders to find the exact class name of the message. Is it `CreateUserCommand`? `AddUser`? `UserRegistrationRequest`?
-
 
 **Faster.Modulith** solves this by generating **Friendly APIs** that provide instant discovery via IntelliSense.
 
@@ -185,7 +243,7 @@ sequenceDiagram
 
 ```
 
-### 1. The Generated EntryPoint (The Public Facade) 🟢
+### 1. The Generated EntryPoint (The Public Facade) 
 Instead of interacting with the raw engine, the Source Generator creates a **Public API Wrapper** (`I{Module}Api`) for every module. This acts as the Airlock for cross-module communication.
 
 **Why this enriches your DX:**
@@ -201,17 +259,8 @@ Testing "Internal" code is usually a nightmare of `AssemblyInfo.cs` edits. Our S
 
 ---
 
-## Performance & "Zero-Inference"
-We avoid magic strings and dynamic keywords.
-
-* **Zero Runtime Reflection for Dispatching:** The generated `HumanResourcesApi` class uses strongly-typed, compile-time linked calls to the Orchestrator.
-* **Zero Ambiguity:** The Generator creates unique Extension methods (`AddHumanResourcesModule`) inside a shared namespace (`Faster.Modulith`), eliminating the need to hunt for using statements.
-
----
-
-## Project Structure (The Law)
+## Project Structure
 The framework enforces a specific physical structure to ensure the "Vault" stays locked.
-
 
 | Path | Purpose | Visibility |
 | :--- | :--- | :--- |

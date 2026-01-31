@@ -9,7 +9,7 @@ namespace Host.Api.Controllers;
 [Route("api/facilities")]
 // HOW: Primary Constructor Injection.
 // We inject the Facilities Public API interface.
-public class FacilitiesController(IFacilitiesModule Api) : ControllerBase
+public class FacilitiesController(IFacilitiesModule facilitiesModule) : ControllerBase
 {
     // POST api/facilities/guests
     // SCENARIO: A visitor is standing at the reception desk.
@@ -23,7 +23,7 @@ public class FacilitiesController(IFacilitiesModule Api) : ControllerBase
         // Is this business logic? Technically, yes.
         // Ideally, the UseCase should decide the default duration, or the Client should send it.
         // But for simple "Defaults", doing it in the controller is sometimes acceptable.
-        var result = await Api.GrantGuestAccess(req.VisitorName, DateTime.UtcNow.AddHours(8));
+        var result = await facilitiesModule.GrantGuestAccess(req.VisitorName, DateTime.UtcNow.AddHours(8));
 
         if (!result.IsSuccess)
         {

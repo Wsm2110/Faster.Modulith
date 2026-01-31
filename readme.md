@@ -195,7 +195,7 @@ Dispatcher.g.cs (Internal Communication): An internal class that handles private
 
 Extensions.g.cs: Contains the IServiceCollection logic to register all handlers and generated types automatically. All code in this file is generated into the Faster.Modulith namespace.
 
-![Show_Generated_Files](assets/generated.png)
+![Show_Generated_Files](assets/Generated.png)
 
 ---
 

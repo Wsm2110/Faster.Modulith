@@ -6,24 +6,9 @@
     This script scaffolds a new module following the modular monolith architecture pattern.
     
     File System Structure:
-      {ModulesDir}/Module.{Name}/       -> Contains Api and Implementation projects
-      {TestsDir}/Module.{Name}.Tests/   -> Contains Test project (.csproj is here directly)
-    
-    Solution Structure:
-      src   -> Module.{Name} and Module.{Name}.Api
-      tests -> Module.{Name}.Tests
-
-.PARAMETER Name
-    The name of the module to create (without the "Module." prefix).
-
-.PARAMETER SolutionPath
-    Optional path to the solution file. If not provided, the script will auto-detect .sln or .slnx files by searching upwards.
-
-.PARAMETER FrameworkVersion
-    Target .NET framework version (e.g., "net10.0", "net9.0", "net8.0"). Default is "net10.0".
-
-.PARAMETER SkipRestore
-    Skip running dotnet restore after creating the module.
+      src/modules/Module.{Name}/Module.{Name}/       -> Implementation project
+      src/modules/Module.{Name}/Module.{Name}.Api/   -> Api project
+      tests/Module.{Name}.Tests/                     -> Test project
 #>
 
 param(
@@ -56,7 +41,6 @@ $vImmutable  = "9.0.0"
 $vContracts  = "1.0.0"
 $vAnalyzers  = "1.0.0"
 $vFluent     = "12.1.1"
-$vMapperly   = "4.3.1"
 
 # ----------------------------------------------------------------
 # 0. Intelligent Solution Root Discovery
@@ -70,19 +54,16 @@ function Get-SolutionFile([string]$path) {
 
 $targetSolutionFile = $null
 
-# Priority 1: User provided path
 if (-not [string]::IsNullOrWhiteSpace($SolutionPath)) {
     $resolved = Resolve-Path $SolutionPath -ErrorAction SilentlyContinue
     if ($resolved) { $targetSolutionFile = Get-Item $resolved.Path }
 }
 
-# Priority 2: Current Shell Location (PWD) - ONLY if not System32
 $currentShellPath = Get-Location
 if (-not $targetSolutionFile -and $currentShellPath.Path -ne "C:\Windows\System32") {
     $targetSolutionFile = Get-SolutionFile $currentShellPath.Path
 }
 
-# Priority 3: Walk up from Script Location
 if (-not $targetSolutionFile) {
     $searchPath = $PSScriptRoot
     while ($searchPath -and (Split-Path -Parent $searchPath) -ne $searchPath) {
@@ -103,7 +84,6 @@ if (-not $targetSolutionFile) {
 $solutionRoot = $targetSolutionFile.DirectoryName
 $SolutionPath = $targetSolutionFile.FullName
 
-# Validate module name
 $invalidChars = '[^a-zA-Z0-9_]'
 if ($Name -match $invalidChars) {
     Write-Host "ERROR: Module name can only contain letters, numbers, and underscores" -ForegroundColor Red
@@ -118,159 +98,128 @@ Set-Location $solutionRoot
 
 try {
     # ----------------------------------------------------------------
-    # 1. Setup Directories (Recursive Discovery)
+    # 1. Setup Directories
     # ----------------------------------------------------------------
     
-    # Helper to find folders while ignoring build artifacts
-    function Find-ProjectFolder {
-        param([string]$rootPath, [string]$folderName)
-        return Get-ChildItem -Path $rootPath -Directory -Recurse -ErrorAction SilentlyContinue | 
-            Where-Object { 
-                $_.Name -ieq $folderName -and 
-                $_.FullName -notmatch '[\\](bin|obj|\.git|\.vs|node_modules)[\\]' 
-            } | Select-Object -First 1
+    # 1a. Modules Directory (src/modules)
+    $srcDirectory = Join-Path $solutionRoot "src"
+    if (-not (Test-Path $srcDirectory)) {
+        New-Item -Path $srcDirectory -ItemType Directory -Force | Out-Null
     }
-
-    # 1a. Modules Directory
-    $existingModules = Find-ProjectFolder -rootPath $solutionRoot -folderName "Modules"
     
-    if ($existingModules) {
-        $modulesDirectory = $existingModules.FullName
-        Write-Host "Found existing Modules directory: $($existingModules.FullName)" -ForegroundColor DarkGray
-    } else {
-        # Default fallback if not found: create it in the root
-        $modulesDirectory = Join-Path $solutionRoot "Modules"
+    $modulesDirectory = Join-Path $srcDirectory "modules"
+    if (-not (Test-Path $modulesDirectory)) {
         New-Item -Path $modulesDirectory -ItemType Directory -Force | Out-Null
-        Write-Host "Created new Modules directory: $modulesDirectory" -ForegroundColor DarkGray
     }
 
     # 1b. Tests Directory
-    $existingTests = Find-ProjectFolder -rootPath $solutionRoot -folderName "tests"
-
-    if ($existingTests) {
-        $testsDirectory = $existingTests.FullName
-        Write-Host "Found existing tests directory: $($existingTests.FullName)" -ForegroundColor DarkGray
-    } else {
-        # Default fallback if not found: create it in the root
-        $testsDirectory = Join-Path $solutionRoot "tests"
+    $testsDirectory = Join-Path $solutionRoot "tests"
+    if (-not (Test-Path $testsDirectory)) {
         New-Item -Path $testsDirectory -ItemType Directory -Force | Out-Null
-        Write-Host "Created new tests directory: $testsDirectory" -ForegroundColor DarkGray
     }
 
     # ----------------------------------------------------------------
     # 2. Create Module Projects (API & Implementation)
     # ----------------------------------------------------------------
-    Set-Location $modulesDirectory
     
-    if (-not (Test-Path $moduleName)) {
-        New-Item -Path $moduleName -ItemType Directory | Out-Null
+    # Create the module folder: src/modules/Module.{Name}
+    $moduleParentPath = Join-Path $modulesDirectory $moduleName
+    if (-not (Test-Path $moduleParentPath)) {
+        New-Item -Path $moduleParentPath -ItemType Directory | Out-Null
     }
-    Set-Location $moduleName
-    $moduleRootPath = Get-Location
 
     # --- 2a. Create API Project ---
-    if (-not (Test-Path "$apiProjectName/$apiProjectName.csproj")) {
-        dotnet new classlib -n $apiProjectName --framework $frameworkVersion --no-restore | Out-Null
-        New-Item -Path "$apiProjectName/Dto" -ItemType Directory -Force | Out-Null
-        Remove-Item "$apiProjectName/Class1.cs" -ErrorAction SilentlyContinue
+    $apiProjectPath = Join-Path $moduleParentPath $apiProjectName
+    if (-not (Test-Path "$apiProjectPath/$apiProjectName.csproj")) {
+        dotnet new classlib -n $apiProjectName -o $apiProjectPath --framework $frameworkVersion --no-restore | Out-Null
+        New-Item -Path "$apiProjectPath/Dto" -ItemType Directory -Force | Out-Null
+        Remove-Item "$apiProjectPath/Class1.cs" -ErrorAction SilentlyContinue
 
-        $apiCsproj = "$apiProjectName/$apiProjectName.csproj"
+        $apiCsproj = "$apiProjectPath/$apiProjectName.csproj"
         $apiXml = Get-Content $apiCsproj -Raw
-
-        $apiInject = @(
-            "  <ItemGroup>",
-            "    <PackageReference Include=""Microsoft.Extensions.DependencyInjection"" Version=""$vExtensions"" />",
-            "    <PackageReference Include=""Microsoft.Extensions.Options"" Version=""$vExtensions"" />",        
-            "    <PackageReference Include=""Faster.Modulith.Contracts"" Version=""$vContracts"" />",
-            "    <PackageReference Include=""Faster.Modulith.Analyzers"" Version=""$vAnalyzers"" OutputItemType=""Analyzer"" ReferenceOutputAssembly=""false"" />",
-            "  </ItemGroup>",
-            "  <ItemGroup>",
-            "    <Folder Include=""Dto\"" />",
-            "  </ItemGroup>",
-            "</Project>"
-        ) -join [Environment]::NewLine
-
-        $closingTag = "</Project>"
-        Set-Content -Path $apiCsproj -Value ($apiXml -replace $closingTag, $apiInject)
+        $apiInject = @"
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$vExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="$vExtensions" />        
+    <PackageReference Include="Faster.Modulith.Contracts" Version="$vContracts" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="$vAnalyzers" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Dto\" />
+  </ItemGroup>
+</Project>
+"@
+        Set-Content -Path $apiCsproj -Value ($apiXml -replace "</Project>", $apiInject)
     }
 
     # --- 2b. Create Implementation Project ---
-    if (-not (Test-Path "$moduleName/$moduleName.csproj")) {
-        dotnet new classlib -n $moduleName --framework $frameworkVersion --no-restore | Out-Null
+    $implProjectPath = Join-Path $moduleParentPath $moduleName
+    if (-not (Test-Path "$implProjectPath/$moduleName.csproj")) {
+        dotnet new classlib -n $moduleName -o $implProjectPath --framework $frameworkVersion --no-restore | Out-Null
 
         $folders = @("Domain", "Infrastructure", "Contracts", "Application/UseCases", "Application/CommandHandlers", "Application/EventHandlers")
-        foreach ($f in $folders) { New-Item -Path "$moduleName/$f" -ItemType Directory -Force | Out-Null }
-        
-        Remove-Item "$moduleName/Class1.cs" -ErrorAction SilentlyContinue
+        foreach ($f in $folders) { New-Item -Path "$implProjectPath/$f" -ItemType Directory -Force | Out-Null }
+        Remove-Item "$implProjectPath/Class1.cs" -ErrorAction SilentlyContinue
 
-        $implCsproj = "$moduleName/$moduleName.csproj"
+        $implCsproj = "$implProjectPath/$moduleName.csproj"
         $implXml = Get-Content $implCsproj -Raw
-
-        $implInject = @(
-            "  <ItemGroup>",
-            "    <PackageReference Include=""FluentValidation"" Version=""$vFluent"" />",
-            "    <PackageReference Include=""Microsoft.Extensions.DependencyInjection"" Version=""$vExtensions"" />",
-            "    <PackageReference Include=""Microsoft.Extensions.Options"" Version=""$vExtensions"" />",    
-            "    <PackageReference Include=""Faster.Modulith.Contracts"" Version=""$vContracts"" />",
-            "    <PackageReference Include=""Faster.Modulith.Analyzers"" Version=""$vAnalyzers"" OutputItemType=""Analyzer"" ReferenceOutputAssembly=""false"" />",
-            "  </ItemGroup>",
-            "  <ItemGroup>",
-            "    <Folder Include=""Application\UseCases\"" />",
-            "    <Folder Include=""Application\EventHandlers\"" />",
-            "    <Folder Include=""Application\CommandHandlers\"" />",
-            "    <Folder Include=""Contracts\"" />",
-            "    <Folder Include=""Domain\"" />",
-            "    <Folder Include=""Infrastructure\"" />",
-            "  </ItemGroup>",
-            "</Project>"
-        ) -join [Environment]::NewLine
-
-        $closingTag = "</Project>"
-        Set-Content -Path $implCsproj -Value ($implXml -replace $closingTag, $implInject)
+        $implInject = @"
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="$vFluent" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$vExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="$vExtensions" />    
+    <PackageReference Include="Faster.Modulith.Contracts" Version="$vContracts" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="$vAnalyzers" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Application\UseCases\" />
+    <Folder Include="Application\EventHandlers\" />
+    <Folder Include="Application\CommandHandlers\" />
+    <Folder Include="Contracts\" />
+    <Folder Include="Domain\" />
+    <Folder Include="Infrastructure\" />
+  </ItemGroup>
+</Project>
+"@
+        Set-Content -Path $implCsproj -Value ($implXml -replace "</Project>", $implInject)
     }
 
-    $apiCsprojPath = Join-Path $moduleRootPath (Join-Path $apiProjectName "$apiProjectName.csproj")
-    $implCsprojPath = Join-Path $moduleRootPath (Join-Path $moduleName "$moduleName.csproj")
+    # API and Impl Csproj paths for wiring
+    $apiCsprojFile = Join-Path $apiProjectPath "$apiProjectName.csproj"
+    $implCsprojFile = Join-Path $implProjectPath "$moduleName.csproj"
 
     # Wire API -> Impl
-    dotnet add $implCsprojPath reference $apiCsprojPath > $null
+    dotnet add $implCsprojFile reference $apiCsprojFile > $null
 
     # ----------------------------------------------------------------
     # 3. Create Test Project
     # ----------------------------------------------------------------
-    Set-Location $testsDirectory
+    $testProjectPath = Join-Path $testsDirectory $testProjectName
     
-    if (-not (Test-Path $testProjectName)) {
-        New-Item -Path $testProjectName -ItemType Directory | Out-Null
-    }
-    
-    Set-Location $testProjectName
-    
-    if (-not (Test-Path "$testProjectName.csproj")) {
-        dotnet new xunit -n $testProjectName -o . --framework $frameworkVersion --no-restore | Out-Null
+    if (-not (Test-Path "$testProjectPath/$testProjectName.csproj")) {
+        dotnet new xunit -n $testProjectName -o $testProjectPath --framework $frameworkVersion --no-restore | Out-Null
     }
 
-    $testCsprojPath = Join-Path $testsDirectory (Join-Path $testProjectName "$testProjectName.csproj")
+    $testCsprojFile = Join-Path $testProjectPath "$testProjectName.csproj"
 
     # Wire Tests -> API & Impl
-    dotnet add $testCsprojPath reference $apiCsprojPath > $null
-    dotnet add $testCsprojPath reference $implCsprojPath > $null
+    dotnet add $testCsprojFile reference $apiCsprojFile > $null
+    dotnet add $testCsprojFile reference $implCsprojFile > $null
 
     # ----------------------------------------------------------------
     # 4. Add to Solution
     # ----------------------------------------------------------------
-    Set-Location $solutionRoot
-
-    dotnet sln $SolutionPath add $apiCsprojPath  --solution-folder "src" > $null
-    dotnet sln $SolutionPath add $implCsprojPath --solution-folder "src" > $null
-    dotnet sln $SolutionPath add $testCsprojPath --solution-folder "tests" > $null
+    $moduleSolutionFolder = "src\modules\$Name"
+    dotnet sln $SolutionPath add $apiCsprojFile  --solution-folder $moduleSolutionFolder > $null
+    dotnet sln $SolutionPath add $implCsprojFile --solution-folder $moduleSolutionFolder > $null
+    dotnet sln $SolutionPath add $testCsprojFile --solution-folder "tests" > $null
 
     Write-Host "Done!" -ForegroundColor Green
     
     if (-not $SkipRestore) {
-        dotnet restore $apiCsprojPath --verbosity quiet
-        dotnet restore $implCsprojPath --verbosity quiet
-        dotnet restore $testCsprojPath --verbosity quiet
+        dotnet restore $apiCsprojFile --verbosity quiet
+        dotnet restore $implCsprojFile --verbosity quiet
+        dotnet restore $testCsprojFile --verbosity quiet
     }
 
 } catch {

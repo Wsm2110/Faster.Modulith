@@ -51,11 +51,12 @@ public static class Scanner
         return symbol.ToDisplayString(StrictFormat);
     }
 
-    public static (List<HandlerInfo> Items, bool HasManualPipelines) ScanLocalTypes(Compilation compilation, CancellationToken ct)
+    public static (List<HandlerInfo> Items, bool HasManualPipelines) ScanTypes(Compilation compilation, CancellationToken ct)
     {
         var results = new List<HandlerInfo>();
         bool hasManualPipelines = false;
 
+        // 1. SCAN LOCAL SYNTAX FOR MANUAL PIPELINES
         foreach (var tree in compilation.SyntaxTrees)
         {
             var root = tree.GetRoot(ct);
@@ -74,86 +75,97 @@ public static class Scanner
                     if (distinctUsage) hasManualPipelines = true;
                 }
             }
+        }
 
-            var semanticModel = compilation.GetSemanticModel(tree);
-            var types = root.DescendantNodes().OfType<TypeDeclarationSyntax>();
+        // 2. SCAN ALL ACCESSIBLE SYMBOLS (Current Assembly + References like .Api)
+        var allSymbols = GetAllNamedTypes(compilation.GlobalNamespace);
 
-            foreach (var typeDecl in types)
+        foreach (var symbol in allSymbols)
+        {
+            if (symbol.IsAbstract || symbol.IsStatic) continue;
+
+            // SCAN FOR PIPELINES
+            foreach (var iface in symbol.AllInterfaces)
             {
-                if (semanticModel.GetDeclaredSymbol(typeDecl, ct) is not INamedTypeSymbol symbol)
-                    continue;
-
-                if (symbol.IsAbstract || symbol.IsStatic) continue;
-
-                foreach (var iface in symbol.AllInterfaces)
+                if (iface.Name == "IPipelineBehavior")
                 {
-                    if (iface.Name == "IPipelineBehavior")
-                    {
-                        bool isGeneric = symbol.IsGenericType;
-                        string implType = isGeneric ? GetUnboundTypeName(symbol) : GetFullTypeName(symbol);
-                        string interfaceType = isGeneric
-                            ? "global::Faster.Modulith.Contracts.IPipelineBehavior<,>"
-                            : $"global::Faster.Modulith.Contracts.IPipelineBehavior<{GetFullTypeName(iface.TypeArguments[0])}, {GetFullTypeName(iface.TypeArguments[1])}>";
+                    bool isGeneric = symbol.IsGenericType;
+                    string implType = isGeneric ? GetUnboundTypeName(symbol) : GetFullTypeName(symbol);
+                    string interfaceType = isGeneric
+                        ? "global::Faster.Modulith.Contracts.IPipelineBehavior<,>"
+                        : $"global::Faster.Modulith.Contracts.IPipelineBehavior<{GetFullTypeName(iface.TypeArguments[0])}, {GetFullTypeName(iface.TypeArguments[1])}>";
 
-                        results.Add(new HandlerInfo(
-                            ImplementationType: implType,
-                            ServiceInterfaceType: interfaceType,
-                            SimpleRequestName: symbol.Name,
-                            ResponseType: "void",
-                            Type: ArtifactType.Pipeline,
-                            IsHandler: false,
-                            Parameters: new(),
-                            PipelineBehaviors: new()
-                        ));
-                    }
-                }
-
-                foreach (var iface in symbol.AllInterfaces)
-                {
-                    if (iface.Name == "IEvent")
-                    {
-                        AddDefinition(results, symbol, null, ArtifactType.Event);
-                        continue;
-                    }
-
-                    if (!iface.IsGenericType) continue;
-
-                    if (iface.Name == "IUseCase")
-                    {
-                        AddDefinition(results, symbol, iface.TypeArguments[0], ArtifactType.UseCase);
-                        continue;
-                    }
-
-                    ArtifactType? handlerType = iface.Name switch
-                    {
-                        "ICommandHandler" => ArtifactType.Command,
-                        "IUseCaseHandler" => ArtifactType.UseCase,
-                        "IEventHandler" => ArtifactType.Event,
-                        _ => null
-                    };
-
-                    if (handlerType == null) continue;
-                    if (iface.TypeArguments.Length == 0) continue;
-
-                    var requestSymbol = iface.TypeArguments[0];
-                    var responseSymbol = iface.TypeArguments.Length > 1 ? iface.TypeArguments[1] : null;
-
-                    var handlerBehaviors = ExtractPipelineBehaviors(symbol);
-                    var requestBehaviors = ExtractPipelineBehaviors(requestSymbol);
-                    var allBehaviors = handlerBehaviors.Concat(requestBehaviors).Distinct().ToList();
-
-                    results.Add(Create(
-                        implType: GetFullTypeName(symbol),
-                        reqSymbol: requestSymbol,
-                        resSymbol: responseSymbol,
-                        type: handlerType.Value,
-                        isHandler: true,
-                        behaviors: allBehaviors
+                    results.Add(new HandlerInfo(
+                        ImplementationType: implType,
+                        ServiceInterfaceType: interfaceType,
+                        SimpleRequestName: symbol.Name,
+                        ResponseType: "void",
+                        Type: ArtifactType.Pipeline,
+                        IsHandler: false,
+                        Parameters: new(),
+                        PipelineBehaviors: new()
                     ));
                 }
             }
+
+            // SCAN FOR EVENTS (Found in .Api references)
+            if (symbol.AllInterfaces.Any(i => i.Name == "IEvent"))
+            {
+                AddDefinition(results, symbol, null, ArtifactType.Event);
+            }
+
+            // SCAN FOR HANDLERS & USECASES
+            foreach (var iface in symbol.AllInterfaces)
+            {
+                if (!iface.IsGenericType) continue;
+
+                if (iface.Name == "IUseCase")
+                {
+                    AddDefinition(results, symbol, iface.TypeArguments[0], ArtifactType.UseCase);
+                    continue;
+                }
+
+                ArtifactType? handlerType = iface.Name switch
+                {
+                    "ICommandHandler" => ArtifactType.Command,
+                    "IUseCaseHandler" => ArtifactType.UseCase,
+                    "IEventHandler" => ArtifactType.Event,
+                    _ => null
+                };
+
+                if (handlerType == null) continue;
+                if (iface.TypeArguments.Length == 0) continue;
+
+                var requestSymbol = iface.TypeArguments[0];
+                var responseSymbol = iface.TypeArguments.Length > 1 ? iface.TypeArguments[1] : null;
+
+                var handlerBehaviors = ExtractPipelineBehaviors(symbol);
+                var requestBehaviors = ExtractPipelineBehaviors(requestSymbol);
+                var allBehaviors = handlerBehaviors.Concat(requestBehaviors).Distinct().ToList();
+
+                results.Add(Create(
+                    implType: GetFullTypeName(symbol),
+                    reqSymbol: requestSymbol,
+                    resSymbol: responseSymbol,
+                    type: handlerType.Value,
+                    isHandler: true,
+                    behaviors: allBehaviors
+                ));
+            }
         }
         return (results, hasManualPipelines);
+    }
+
+    private static IEnumerable<INamedTypeSymbol> GetAllNamedTypes(INamespaceSymbol ns)
+    {
+        foreach (var type in ns.GetTypeMembers())
+            yield return type;
+
+        foreach (var subNs in ns.GetNamespaceMembers())
+        {
+            foreach (var type in GetAllNamedTypes(subNs))
+                yield return type;
+        }
     }
 
     private static List<string> ExtractPipelineBehaviors(ISymbol symbol)
@@ -186,6 +198,9 @@ public static class Scanner
 
     private static void AddDefinition(List<HandlerInfo> results, INamedTypeSymbol requestSymbol, ITypeSymbol responseSymbol, ArtifactType type)
     {
+        if (results.Any(r => r.ServiceInterfaceType == GetFullTypeName(requestSymbol) && r.Type == type && !r.IsHandler))
+            return;
+
         var behaviors = ExtractPipelineBehaviors(requestSymbol);
         results.Add(Create(
             implType: null,
@@ -237,7 +252,7 @@ public sealed class DispatchGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var scanResult = context.CompilationProvider.Select((c, ct) => Scanner.ScanLocalTypes(c, ct));
+        var scanResult = context.CompilationProvider.Select((c, ct) => Scanner.ScanTypes(c, ct));
         var assembly = context.CompilationProvider.Select((c, ct) => c.AssemblyName);
         var source = scanResult.Combine(assembly);
 
@@ -246,11 +261,9 @@ public sealed class DispatchGenerator : IIncrementalGenerator
 
     private static void Execute(SourceProductionContext context, List<HandlerInfo> items, bool hasManualPipelines, string assemblyName)
     {
-        // 1. Module detection logic
         var match = Regex.Match(assemblyName, @"(?:^|\.)Modules?\.(\w+)", RegexOptions.IgnoreCase);
         string moduleName = match.Success ? match.Groups[1].Value : assemblyName.Split('.').Last();
 
-        // Filter based on "Module" naming requirement
         bool isModuleProject = assemblyName.IndexOf("Module", StringComparison.OrdinalIgnoreCase) >= 0;
         bool isApi = assemblyName.EndsWith(".Api", StringComparison.OrdinalIgnoreCase);
 
@@ -263,7 +276,10 @@ public sealed class DispatchGenerator : IIncrementalGenerator
         {
             var handlers = items.Where(x => x.IsHandler).ToList();
             var commands = handlers.Where(h => h.Type == ArtifactType.Command).ToList();
-            var events = items.Where(x => x.Type == ArtifactType.Event).ToList();
+
+            // Look for IEvents that are in the .Api namespace/assembly associated with this module
+            string apiNamespacePart = assemblyName.Replace(".Module", ".Api");
+            var events = items.Where(x => x.Type == ArtifactType.Event && !x.IsHandler && x.ServiceInterfaceType.Contains(apiNamespacePart)).ToList();
 
             GenerateInternalDispatcher(context, commands, events, moduleName, hasManualPipelines);
 
@@ -301,7 +317,9 @@ internal interface I{moduleName}Dispatcher {{");
         {
             string methodName = evt.SimpleRequestName.Replace("Event", "");
             var methodParams = string.Join(", ", evt.Parameters.Select(p => $"{p.Type} {p.Name}"));
-            sb.AppendLine($"    void Publish{methodName}({methodParams}, CancellationToken ct = default);");
+            if (!string.IsNullOrEmpty(methodParams)) methodParams += ", ";
+
+            sb.AppendLine($"    void Publish{methodName}({methodParams}CancellationToken ct = default);");
         }
 
         sb.AppendLine("}");
@@ -360,10 +378,12 @@ internal sealed class {moduleName}Dispatcher : I{moduleName}Dispatcher
         {
             string methodName = evt.SimpleRequestName.Replace("Event", "");
             var methodParams = string.Join(", ", evt.Parameters.Select(p => $"{p.Type} {p.Name}"));
+            if (!string.IsNullOrEmpty(methodParams)) methodParams += ", ";
+
             var ctorArgs = string.Join(", ", evt.Parameters.Select(p => p.Name));
 
             sb.AppendLine($@"
-    public void Publish{methodName}({methodParams}, CancellationToken ct = default)
+    public void Publish{methodName}({methodParams}CancellationToken ct = default)
     {{
         var evt = new {evt.ServiceInterfaceType}({ctorArgs});
         var handlers = _sp.GetServices<global::Faster.Modulith.Contracts.IEventHandler<{evt.ServiceInterfaceType}>>();
@@ -378,7 +398,7 @@ internal sealed class {moduleName}Dispatcher : I{moduleName}Dispatcher
                 }}
                 catch 
                 {{
-                    // Suppression for fire-and-forget
+                    // Fire-and-forget background suppression
                 }}
             }}, ct);
         }}

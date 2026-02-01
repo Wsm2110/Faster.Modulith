@@ -10,14 +10,16 @@
     <RepositoryUrl>https://github.com/Wsm2110/Faster.Modulith</RepositoryUrl>
     <PackageId>Faster.Modulith.Analyzers</PackageId>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <Version>1.0.3</Version>
+    <Version>1.0.1</Version>
     <Description>Building unbreakable monoliths with rosyln sourcegenerators</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Wiljan Ruizendaal</Authors>
     <Company>Faster Framework</Company>
     <Description>
-      A high-performance framework for building unbreakable modular monoliths in .NET. Uses Roslyn Source Generators to enforce strict architectural boundaries and eliminate dispatching boilerplate at compile-time.
+      A high-performance framework for building unbreakable modular monoliths in .NET.
+      Uses Roslyn Source Generators to enforce strict architectural boundaries and eliminate dispatching boilerplate at compile-time.
+      Ensuring the final feature is implemented as seamlessly as the first.
     </Description>
   </PropertyGroup>
 

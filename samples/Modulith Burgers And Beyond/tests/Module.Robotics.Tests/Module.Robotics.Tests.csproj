@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\modules\Module.Kitchen\Module.Kitchen.Api\Module.Kitchen.Api.csproj" />
-    <ProjectReference Include="..\..\src\modules\Module.Kitchen\Module.Kitchen\Module.Kitchen.csproj" />
+    <ProjectReference Include="..\..\src\modules\Module.Robotics\Module.Robotics.Api\Module.Robotics.Api.csproj" />
+    <ProjectReference Include="..\..\src\modules\Module.Robotics\Module.Robotics\Module.Robotics.csproj" />
   </ItemGroup>
 
 </Project>

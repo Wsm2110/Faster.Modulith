@@ -1,21 +1,23 @@
 <Solution>
   <Folder Name="/src/" />
   <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Kitchen/">
+    <Project Path="src/modules/Module.Kitchen/Module.Kitchen.Api/Module.Kitchen.Api.csproj" />
+    <Project Path="src/modules/Module.Kitchen/Module.Kitchen/Module.Kitchen.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Ordering/">
     <Project Path="src/Modules/Module.Ordering/Module.Ordering.Api/Module.Ordering.Api.csproj" />
     <Project Path="src/Modules/Module.Ordering/Module.Ordering/Module.Ordering.csproj" />
   </Folder>
-  <Folder Name="/src/Root/">
-    <Project Path="src/BurgersAndBeyong.WebApi/BurgersAndBeyong.WebApi.csproj" Id="76be59be-eb89-4476-92ae-eafe706e991a" />
+  <Folder Name="/src/Modules/Robotics/">
+    <Project Path="src/modules/Module.Robotics/Module.Robotics.Api/Module.Robotics.Api.csproj" />
+    <Project Path="src/modules/Module.Robotics/Module.Robotics/Module.Robotics.csproj" />
   </Folder>
+  <Folder Name="/src/Root/" />
   <Folder Name="/src/Shared/" />
   <Folder Name="/tests/">
-    <Project Path="tests/Module.Employee.Tests/Module.Employee.Tests.csproj" />
-    <Project Path="tests/Module.Feedback.Tests/Module.Feedback.Tests.csproj" />
-    <Project Path="tests/Module.Inventory.Tests/Module.Inventory.Tests.csproj" />
     <Project Path="tests/Module.Kitchen.Tests/Module.Kitchen.Tests.csproj" />
-    <Project Path="tests/Module.Loyalty.Tests/Module.Loyalty.Tests.csproj" />
-    <Project Path="tests/Module.Marketing.Tests/Module.Marketing.Tests.csproj" />
     <Project Path="tests/Module.Ordering.Tests/Module.Ordering.Tests.csproj" />
+    <Project Path="tests/Module.Robotics.Tests/Module.Robotics.Tests.csproj" />
   </Folder>
 </Solution>

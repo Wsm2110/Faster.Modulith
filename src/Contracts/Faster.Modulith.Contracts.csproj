@@ -8,11 +8,13 @@
     <PackageId>Faster.Modulith.Contracts</PackageId>
     <Description>Building unbreakable monoliths with rosyln sourcegenerators</Description>
     <RepositoryUrl>https://github.com/Wsm2110/Faster.Modulith</RepositoryUrl>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Description>
-      A high-performance framework for building unbreakable modular monoliths in .NET. Uses Roslyn Source Generators to enforce strict architectural boundaries and eliminate dispatching boilerplate at compile-time.
+      A high-performance framework for building unbreakable modular monoliths in .NET.
+      Uses Roslyn Source Generators to enforce strict architectural boundaries and eliminate dispatching boilerplate at compile-time.
+      Ensuring the final feature is implemented as seamlessly as the first.
     </Description>
   </PropertyGroup>
 

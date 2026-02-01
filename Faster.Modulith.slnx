@@ -15,26 +15,6 @@
     <Project Path="samples/Modulith Example/Modules/Module.Shipping/Module.Shipping/Module.Shipping.csproj" />
   </Folder>
   <Folder Name="/samples/Modulith Example/Shared/" />
-  <Folder Name="/samples/Modulith Webapi Example/">
-    <Project Path="samples/Modulith Webapi Example/Modulith.Example.WebApi/Modulith.Example.WebApi.csproj" />
-  </Folder>
-  <Folder Name="/samples/Modulith Webapi Example/BuildingBlocks/" />
-  <Folder Name="/samples/Modulith Webapi Example/Modules/" />
-  <Folder Name="/samples/Modulith Webapi Example/Modules/Facilities/">
-    <Project Path="samples/Modulith Webapi Example/Modules/Module.Facilities/Module.Facilities.Api/Module.Facilities.Api.csproj" />
-    <Project Path="samples/Modulith Webapi Example/Modules/Module.Facilities/Module.Facilities/Module.Facilities.csproj" />
-  </Folder>
-  <Folder Name="/samples/Modulith Webapi Example/Modules/HumanResources/">
-    <Project Path="samples/Modulith Webapi Example/Modules/Module.HumanResources/Module.HumanResources.Api/Module.HumanResources.Api.csproj" />
-    <Project Path="samples/Modulith Webapi Example/Modules/Module.HumanResources/Module.HumanResources/Module.HumanResources.csproj" />
-  </Folder>
-  <Folder Name="/samples/Modulith Webapi Example/Modules/IdentityAccess/">
-    <Project Path="samples/Modulith Webapi Example/Modules/Module.IdentityAccess/Module.IdentityAccess.Api/Module.IdentityAccess.Api.csproj" />
-    <Project Path="samples/Modulith Webapi Example/Modules/Module.IdentityAccess/Module.IdentityAccess/Module.IdentityAccess.csproj" />
-  </Folder>
-  <Folder Name="/samples/Modulith Webapi Example/Shared/">
-    <Project Path="samples/Modulith Webapi Example/Shared/Faster.Modulith.Shared/Faster.Modulith.Shared.csproj" Id="84663485-7291-473e-87a2-e9116bf79729" />
-  </Folder>
   <Folder Name="/Solution Items/">
     <File Path="assets/scripts/create-module.ps1" />
     <File Path="ReadMe.md" />

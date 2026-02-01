@@ -21,8 +21,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\modules\Feedback\Module.Feedback.Api\Module.Feedback.Api.csproj" />
     <ProjectReference Include="..\..\src\modules\Feedback\Module.Feedback\Module.Feedback.csproj" />
-    <ProjectReference Include="..\..\src\modules\Module.Feedback\Module.Feedback.Api\Module.Feedback.Api.csproj" />
-    <ProjectReference Include="..\..\src\modules\Module.Feedback\Module.Feedback\Module.Feedback.csproj" />
   </ItemGroup>
 
 </Project>

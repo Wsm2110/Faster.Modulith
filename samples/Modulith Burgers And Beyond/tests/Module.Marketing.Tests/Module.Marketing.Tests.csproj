@@ -18,9 +18,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Modules\Module.Marketing\Module.Marketing.Api\Module.Marketing.Api.csproj" />
-    <ProjectReference Include="..\..\src\Modules\Module.Marketing\Module.Marketing\Module.Marketing.csproj" />
-  </ItemGroup>
-
 </Project>

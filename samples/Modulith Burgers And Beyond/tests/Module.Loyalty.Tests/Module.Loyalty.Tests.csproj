@@ -18,9 +18,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Modules\Module.Loyalty\Module.Loyalty.Api\Module.Loyalty.Api.csproj" />
-    <ProjectReference Include="..\..\src\Modules\Module.Loyalty\Module.Loyalty\Module.Loyalty.csproj" />
-  </ItemGroup>
-
 </Project>

@@ -1,34 +1,14 @@
 <Solution>
   <Folder Name="/src/" />
   <Folder Name="/src/Modules/" />
-  <Folder Name="/src/Modules/Employee/">
-    <Project Path="src/Modules/Module.Employee/Module.Employee.Api/Module.Employee.Api.csproj" />
-    <Project Path="src/Modules/Module.Employee/Module.Employee/Module.Employee.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/Feedback/">
-    <Project Path="src/modules/Module.Feedback/Module.Feedback.Api/Module.Feedback.Api.csproj" />
-    <Project Path="src/modules/Module.Feedback/Module.Feedback/Module.Feedback.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/Inventory/">
-    <Project Path="src/Modules/Module.Inventory/Module.Inventory.Api/Module.Inventory.Api.csproj" />
-    <Project Path="src/Modules/Module.Inventory/Module.Inventory/Module.Inventory.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/Kitchen/">
-    <Project Path="src/Modules/Module.Kitchen/Module.Kitchen.Api/Module.Kitchen.Api.csproj" />
-    <Project Path="src/Modules/Module.Kitchen/Module.Kitchen/Module.Kitchen.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/Loyalty/">
-    <Project Path="src/Modules/Module.Loyalty/Module.Loyalty.Api/Module.Loyalty.Api.csproj" />
-    <Project Path="src/Modules/Module.Loyalty/Module.Loyalty/Module.Loyalty.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/Marketing/">
-    <Project Path="src/Modules/Module.Marketing/Module.Marketing.Api/Module.Marketing.Api.csproj" />
-    <Project Path="src/Modules/Module.Marketing/Module.Marketing/Module.Marketing.csproj" />
-  </Folder>
   <Folder Name="/src/Modules/Ordering/">
     <Project Path="src/Modules/Module.Ordering/Module.Ordering.Api/Module.Ordering.Api.csproj" />
     <Project Path="src/Modules/Module.Ordering/Module.Ordering/Module.Ordering.csproj" />
   </Folder>
+  <Folder Name="/src/Root/">
+    <Project Path="src/BurgersAndBeyong.WebApi/BurgersAndBeyong.WebApi.csproj" Id="76be59be-eb89-4476-92ae-eafe706e991a" />
+  </Folder>
+  <Folder Name="/src/Shared/" />
   <Folder Name="/tests/">
     <Project Path="tests/Module.Employee.Tests/Module.Employee.Tests.csproj" />
     <Project Path="tests/Module.Feedback.Tests/Module.Feedback.Tests.csproj" />

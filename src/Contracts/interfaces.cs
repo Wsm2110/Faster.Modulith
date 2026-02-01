@@ -38,6 +38,4 @@ public interface IOrchestrator
     // 1. DISPATCH (Fast, Direct)
     ValueTask<TResponse> Dispatch<TUseCase, TResponse>(TUseCase request, CancellationToken ct = default) where TUseCase : IUseCase<TResponse>;
 
-    // 2. BACKGROUND (Fire-and-Forget, Queued)
-    void Publish<TEvent>(TEvent evt, CancellationToken ct = default) where TEvent : IEvent;
 }

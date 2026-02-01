@@ -12,7 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.2" />
     
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.0" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.3" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Module.Shipping\Module.Shipping.Api\Module.Shipping.Api.csproj" />

@@ -18,9 +18,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Modules\Module.Kitchen\Module.Kitchen.Api\Module.Kitchen.Api.csproj" />
-    <ProjectReference Include="..\..\src\Modules\Module.Kitchen\Module.Kitchen\Module.Kitchen.csproj" />
-  </ItemGroup>
-
 </Project>

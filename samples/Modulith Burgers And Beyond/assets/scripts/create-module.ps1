@@ -38,8 +38,8 @@ $testProjectName = "$moduleName.$testsSuffix"
 $frameworkVersion = $FrameworkVersion
 $vExtensions = "10.0.2"
 $vImmutable  = "9.0.0"
-$vContracts  = "1.0.0"
-$vAnalyzers  = "1.0.0"
+$vContracts  = "1.0.*"
+$vAnalyzers  = "1.0.*"
 $vFluent     = "12.1.1"
 
 # ----------------------------------------------------------------

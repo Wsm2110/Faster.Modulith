@@ -1,6 +1,10 @@
 <Solution>
   <Folder Name="/src/" />
   <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Feedback/">
+    <Project Path="src/modules/Module.Feedback/Module.Feedback.Api/Module.Feedback.Api.csproj" />
+    <Project Path="src/modules/Module.Feedback/Module.Feedback/Module.Feedback.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Kitchen/">
     <Project Path="src/modules/Module.Kitchen/Module.Kitchen.Api/Module.Kitchen.Api.csproj" />
     <Project Path="src/modules/Module.Kitchen/Module.Kitchen/Module.Kitchen.csproj" />
@@ -20,6 +24,7 @@
     <Project Path="src/Shared/BurgersAndBeyond.Shared/BurgersAndBeyond.Shared.csproj" Id="887a1702-eec8-4f14-bc9e-1cbb81c0a560" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Module.Feedback.Tests/Module.Feedback.Tests.csproj" />
     <Project Path="tests/Module.Kitchen.Tests/Module.Kitchen.Tests.csproj" />
     <Project Path="tests/Module.Ordering.Tests/Module.Ordering.Tests.csproj" />
     <Project Path="tests/Module.Robotics.Tests/Module.Robotics.Tests.csproj" />

@@ -1,20 +1,5 @@
 <Solution>
   <Folder Name="/benchmark/" />
-  <Folder Name="/samples/" />
-  <Folder Name="/samples/Modulith Example/">
-    <Project Path="samples/Modulith Example/Modulith.Example.Console/Modulith.Example.Console.csproj" Id="99b5f2f8-c8e4-4307-8ac5-9b1063572c67" />
-  </Folder>
-  <Folder Name="/samples/Modulith Example/buildingblocks/" />
-  <Folder Name="/samples/Modulith Example/modules/" />
-  <Folder Name="/samples/Modulith Example/modules/Sales/">
-    <Project Path="samples/Modulith Example/Modules/Module.Sales/Module.Sales.Api/Module.Sales.Api.csproj" />
-    <Project Path="samples/Modulith Example/Modules/Module.Sales/Module.Sales/Module.Sales.csproj" />
-  </Folder>
-  <Folder Name="/samples/Modulith Example/modules/Shipping/">
-    <Project Path="samples/Modulith Example/Modules/Module.Shipping/Module.Shipping.Api/Module.Shipping.Api.csproj" />
-    <Project Path="samples/Modulith Example/Modules/Module.Shipping/Module.Shipping/Module.Shipping.csproj" />
-  </Folder>
-  <Folder Name="/samples/Modulith Example/Shared/" />
   <Folder Name="/Solution Items/">
     <File Path="assets/scripts/create-module.ps1" />
     <File Path="ReadMe.md" />

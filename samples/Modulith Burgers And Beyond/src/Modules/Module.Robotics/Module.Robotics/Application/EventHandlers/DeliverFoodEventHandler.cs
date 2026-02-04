@@ -12,7 +12,6 @@ internal class DeliverFoodEventHandler : IEventHandler<FoodReadyEvent>
     {
         //TODO retrieve food,
         //TODO deliver food to table @event.TableNumber
-        //Return
+        return default; 
     }
 }
-

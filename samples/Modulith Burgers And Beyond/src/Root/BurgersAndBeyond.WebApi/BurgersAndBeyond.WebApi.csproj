@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.2" />
+    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.1" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.1" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\modules\Module.Kitchen\Module.Kitchen.Api\Module.Kitchen.Api.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Kitchen\Module.Kitchen\Module.Kitchen.csproj" />
+    <ProjectReference Include="..\..\Modules\Module.Ordering\Module.Ordering.Api\Module.Ordering.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Module.Ordering\Module.Ordering\Module.Ordering.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Robotics\Module.Robotics.Api\Module.Robotics.Api.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Robotics\Module.Robotics\Module.Robotics.csproj" />
+  </ItemGroup>
+
+</Project>

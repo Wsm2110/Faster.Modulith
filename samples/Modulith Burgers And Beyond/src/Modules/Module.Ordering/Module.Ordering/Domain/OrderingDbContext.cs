@@ -2,7 +2,7 @@
 
 namespace Module.Ordering.Domain;
 
-internal class OrderingDbContext(DbContextOptions<OrderingDbContext> options) : DbContext(options)
+internal class OrderingDbContext : DbContext
 {
     public DbSet<BurgerOrder> Orders => Set<BurgerOrder>();
 

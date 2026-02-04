@@ -9,5 +9,6 @@ public partial class RoboticsExtensions
     static partial void AddInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IRobotHardware, SimulatorRobotHardware>();
+        services.AddScoped<RoboticsDbContext>();
     }
 }

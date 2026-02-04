@@ -4,7 +4,7 @@ using Module.Robotics.Domain;
 namespace Module.Robotics.Infrastructure;
 
 
-internal sealed class RoboticsDbContext(DbContextOptions<RoboticsDbContext> options) : DbContext(options)
+internal sealed class RoboticsDbContext : DbContext
 {
     public DbSet<DeliveryTask> DeliveryTasks => Set<DeliveryTask>();
 

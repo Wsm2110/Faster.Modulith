@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.0" />
-  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Behaviors\" />
+  </ItemGroup>
 
 </Project>

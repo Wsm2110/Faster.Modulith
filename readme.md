@@ -81,7 +81,7 @@ Inside the Module (`.Module` project), everything is internal. Your Domain Entit
 The only way to interact with the Vault is through a specific "Key" defined in the `.Api` project. These are pure, simple DTOs (Records). They have no logic. They are just the request to open the door.
 
 ### 3. The EntryPoint(Api) is Generated (Entry)
-You never talk to the Vault directly. You enter through The Airlock (the Generated `I{Module}Api`). The Airlock accepts your Key, sanitizes the transaction, and securely passes the message to the internal Dispatcher.
+You never talk to the Vault directly. You enter through The Airlock (the Generated `I{ModuleName}`). The Airlock accepts your Key, sanitizes the transaction, and securely passes the message to the internal Dispatcher.
 
 ---
 
@@ -244,11 +244,11 @@ sequenceDiagram
 ```
 
 ### 1. The Generated EntryPoint (The Public Facade) 
-Instead of interacting with the raw engine, the Source Generator creates a **Public API Wrapper** (`I{Module}Api`) for every module. This acts as the Airlock for cross-module communication.
+Instead of interacting with the raw engine, the Source Generator creates a **Public API Wrapper** (`I{ModuleName}`) for every module. This acts as the Airlock for cross-module communication.
 
 **Why this enriches your DX:**
 * **No "Search Hell":** You do not need to hunt for specific message classes.
-* **IntelliSense Discovery:** Simply type `_hrApi.` and your IDE lists exactly what Human Resources can do.
+* **IntelliSense Discovery:** Simply type `_moduleName` and your IDE lists exactly what Human Resources can do.
 * **Strong Typing:** The method signatures are generated directly from your contracts.
 
 ### 2. The Generated Dispatcher (The Internal Manager) 

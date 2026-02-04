@@ -56,7 +56,6 @@ public static class Scanner
         var results = new List<HandlerInfo>();
         bool hasManualPipelines = false;
 
-        // 1. SCAN LOCAL SYNTAX FOR MANUAL PIPELINES
         foreach (var tree in compilation.SyntaxTrees)
         {
             var root = tree.GetRoot(ct);
@@ -77,14 +76,12 @@ public static class Scanner
             }
         }
 
-        // 2. SCAN ALL ACCESSIBLE SYMBOLS (Current Assembly + References like .Api)
         var allSymbols = GetAllNamedTypes(compilation.GlobalNamespace);
 
         foreach (var symbol in allSymbols)
         {
             if (symbol.IsAbstract || symbol.IsStatic) continue;
 
-            // SCAN FOR PIPELINES
             foreach (var iface in symbol.AllInterfaces)
             {
                 if (iface.Name == "IPipelineBehavior")
@@ -108,13 +105,11 @@ public static class Scanner
                 }
             }
 
-            // SCAN FOR EVENTS (Found in .Api references)
             if (symbol.AllInterfaces.Any(i => i.Name == "IEvent"))
             {
                 AddDefinition(results, symbol, null, ArtifactType.Event);
             }
 
-            // SCAN FOR HANDLERS & USECASES
             foreach (var iface in symbol.AllInterfaces)
             {
                 if (!iface.IsGenericType) continue;
@@ -261,6 +256,12 @@ public sealed class DispatchGenerator : IIncrementalGenerator
 
     private static void Execute(SourceProductionContext context, List<HandlerInfo> items, bool hasManualPipelines, string assemblyName)
     {
+        if (string.IsNullOrWhiteSpace(assemblyName) ||
+            assemblyName.IndexOf("test", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return;
+        }
+
         var match = Regex.Match(assemblyName, @"(?:^|\.)Modules?\.(\w+)", RegexOptions.IgnoreCase);
         string moduleName = match.Success ? match.Groups[1].Value : assemblyName.Split('.').Last();
 
@@ -277,7 +278,6 @@ public sealed class DispatchGenerator : IIncrementalGenerator
             var handlers = items.Where(x => x.IsHandler).ToList();
             var commands = handlers.Where(h => h.Type == ArtifactType.Command).ToList();
 
-            // Look for IEvents that are in the .Api namespace/assembly associated with this module
             string apiNamespacePart = assemblyName.Replace(".Module", ".Api");
             var events = items.Where(x => x.Type == ArtifactType.Event && !x.IsHandler && x.ServiceInterfaceType.Contains(apiNamespacePart)).ToList();
 
@@ -346,7 +346,6 @@ internal sealed class {moduleName}Dispatcher : I{moduleName}Dispatcher
     public async {retType} {methodName}({h.ServiceInterfaceType} command, CancellationToken ct) 
     {{
         var handler = _sp.GetRequiredService<global::Faster.Modulith.Contracts.ICommandHandler<{h.ServiceInterfaceType}, {responseType}>>();
-        
         var behaviors = _sp.GetServices<global::Faster.Modulith.Contracts.IPipelineBehavior<{h.ServiceInterfaceType}, {responseType}>>().Reverse();
         
         global::Faster.Modulith.Contracts.RequestHandlerDelegate<{responseType}> pipeline = () => handler.Handle(command, ct);
@@ -379,26 +378,26 @@ internal sealed class {moduleName}Dispatcher : I{moduleName}Dispatcher
             string methodName = evt.SimpleRequestName.Replace("Event", "");
             var methodParams = string.Join(", ", evt.Parameters.Select(p => $"{p.Type} {p.Name}"));
             if (!string.IsNullOrEmpty(methodParams)) methodParams += ", ";
-
             var ctorArgs = string.Join(", ", evt.Parameters.Select(p => p.Name));
 
             sb.AppendLine($@"
     public void Publish{methodName}({methodParams}CancellationToken ct = default)
     {{
-        var evt = new {evt.ServiceInterfaceType}({ctorArgs});
+        var evtData = new {evt.ServiceInterfaceType}({ctorArgs});
         var handlers = _sp.GetServices<global::Faster.Modulith.Contracts.IEventHandler<{evt.ServiceInterfaceType}>>();
         
         foreach (var handler in handlers)
         {{
+            var h = handler;
             _ = Task.Run(async () => 
             {{
                 try 
                 {{
-                    await handler.Handle(evt, ct);
+                    await h.Handle(evtData, ct);
                 }}
                 catch 
                 {{
-                    // Fire-and-forget background suppression
+                    // Suppression
                 }}
             }}, ct);
         }}

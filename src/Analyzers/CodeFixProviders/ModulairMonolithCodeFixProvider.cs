@@ -103,7 +103,7 @@ public class ModularMonolithCodeFixProvider : CodeFixProvider
             interfaceName = "IEventHandler";
             messageInterface = "IEvent";
             methodParam = "@event";
-            returnType = "ValueTask"; // ✅ Fixed: Explicitly ValueTask
+            returnType = "ValueTask"; 
             isTwoGenericArgs = false;
         }
         else if (document.Name.Contains("UseCases") ||

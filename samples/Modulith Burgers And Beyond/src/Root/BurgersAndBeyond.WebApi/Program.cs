@@ -21,7 +21,7 @@ app.MapPost("/orders", async (IOrderingModule module) =>
 {
     // We dispatch the ticket into the vault.
     // The CodeFix-generated Processor handles the rest.
-    var result = await module.PlaceBurgerOrder("Big Burger", 11, string.Empty, CancellationToken.None)
+    var result = await module.PlaceBurgerOrder("Big Burger", 11, string.Empty, CancellationToken.None);
 
     return result.IsSuccess
         ? Results.Ok(result.Value)

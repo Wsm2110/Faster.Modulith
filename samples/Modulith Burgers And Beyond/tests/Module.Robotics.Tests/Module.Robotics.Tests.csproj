@@ -19,8 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\modules\Module.Robotics\Module.Robotics.Api\Module.Robotics.Api.csproj" />
-    <ProjectReference Include="..\..\src\modules\Module.Robotics\Module.Robotics\Module.Robotics.csproj" />
+    <ProjectReference Include="..\..\src\modules\Module.Robotics\Module.Robotics.Api\Module.Robotics.Api.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\modules\Module.Robotics\Module.Robotics\Module.Robotics.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>

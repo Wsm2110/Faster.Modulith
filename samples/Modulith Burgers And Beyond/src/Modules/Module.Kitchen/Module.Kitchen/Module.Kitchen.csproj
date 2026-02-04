@@ -12,7 +12,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.2" />    
     <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.1" />
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.1" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.2" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Application\CommandHandlers\" />
@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Module.Ordering\Module.Ordering.Api\Module.Ordering.Api.csproj" />
+    <ProjectReference Include="..\..\Module.Robotics\Module.Robotics.Api\Module.Robotics.Api.csproj" />
     <ProjectReference Include="..\Module.Kitchen.Api\Module.Kitchen.Api.csproj" />
   </ItemGroup>
 </Project>

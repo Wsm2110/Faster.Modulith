@@ -1,4 +1,6 @@
-﻿namespace Module.Ordering.Domain;
+﻿using Module.Ordering.Api.UseCases;
+
+namespace Module.Ordering.Domain;
 
 internal class BurgerOrder
 {
@@ -68,6 +70,11 @@ internal class BurgerOrder
     }
 
     internal void UpdateStatus(object newStatus)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void Cancel(string reason)
     {
         throw new NotImplementedException();
     }

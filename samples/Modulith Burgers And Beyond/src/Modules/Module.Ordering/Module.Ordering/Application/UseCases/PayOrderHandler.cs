@@ -7,7 +7,6 @@ using Module.Ordering.Api.UseCases;
 
 namespace Module.Ordering.Application.UseCases
 {
-
     /// <summary>
     /// Handles payment processing for orders by marking them as paid and notifying other modules of the payment event.
     /// </summary>
@@ -60,7 +59,6 @@ namespace Module.Ordering.Application.UseCases
             }
         }
     }
-
 
     internal class PayOrderValidator : AbstractValidator<PayOrderUseCase>
     {

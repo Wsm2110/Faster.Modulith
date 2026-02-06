@@ -10,7 +10,7 @@
     <RepositoryUrl>https://github.com/Wsm2110/Faster.Modulith</RepositoryUrl>
     <PackageId>Faster.Modulith.Analyzers</PackageId>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Description>Building unbreakable monoliths with rosyln sourcegenerators</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Contracts\Faster.Modulith.Contracts.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Contracts\Faster.Modulith.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -130,7 +130,7 @@ Open your new **.Api** project and create a record. This record serves as your *
 ### Project: Module.HumanResources.Api
 
 ```csharp
-using NL.MinDef.LandIT.EventBus.Contracts;
+using Faster.Modulith.Contracts;
 
 namespace Module.HumanResources.Api;
 

@@ -3,11 +3,16 @@ using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Module Registrations ---
-builder.Services.AddOrderingModule();
-builder.Services.AddKitchenModule();
-builder.Services.AddRoboticsModule();
-builder.Services.AddModulith();
+builder.Services.AddModulith(builder.Configuration, options =>
+{
+    options.AddKitchen(kitchenOptions =>
+    {
+        kitchenOptions.UseInMemory = true;
+    });
+
+    options.AddOrdering();
+    options.AddRobotics();
+});
 
 // --- Swagger Configuration ---
 // Register the Swagger generator, defining 1 or more Swagger documents

@@ -3,6 +3,7 @@ using FluentValidation;
 using Faster.Modulith.Contracts;
 using Module.Feedback.Api.UseCases;
 using Module.Feedback.Application.CommandHandlers;
+using Module.Feedback.Infrastructure;
 
 namespace Module.Feedback.Application.UseCases;
 

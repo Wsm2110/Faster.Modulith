@@ -4,6 +4,7 @@ using Module.Ordering.Domain;
 using Faster.Modulith;
 using Microsoft.EntityFrameworkCore;
 using Module.Ordering.Api.UseCases;
+using Module.Ordering.Infrastructure;
 
 namespace Module.Ordering.Application.UseCases
 {

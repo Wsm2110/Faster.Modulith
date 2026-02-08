@@ -2,6 +2,7 @@
 using Faster.Modulith.Contracts;
 using Module.Ordering.Api.UseCases;
 using Module.Ordering.Domain;
+using Module.Ordering.Infrastructure;
 
 namespace Module.Ordering.Application.UseCases;
 

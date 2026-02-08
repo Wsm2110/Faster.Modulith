@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Module.Ordering.Domain;
 
-namespace Faster.Modulith; // Note that we have to use this namespace.
+namespace Module.Ordering.Infrastructure; // Note that we have to use this namespace.
 
 public partial class OrderingExtensions
 {

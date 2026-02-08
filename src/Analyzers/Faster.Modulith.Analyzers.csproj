@@ -10,7 +10,7 @@
     <RepositoryUrl>https://github.com/Wsm2110/Faster.Modulith</RepositoryUrl>
     <PackageId>Faster.Modulith.Analyzers</PackageId>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <Description>Building unbreakable monoliths with rosyln sourcegenerators</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -39,7 +39,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="bin\Release\netstandard2.0\\Faster.Modulith.Analyzers.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Remove="bin\Release\netstandard2.0\\Faster.Modulith.Contracts.dll" />
     <None Include="$(OutputPath)\Faster.Modulith.Contracts.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 </Project>

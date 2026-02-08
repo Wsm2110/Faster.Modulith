@@ -2,7 +2,7 @@
 using Module.Robotics.Contracts;
 using Module.Robotics.Infrastructure;
 
-namespace Faster.Modulith;
+namespace Module.Robotics.Infrastructure;
 
 public partial class RoboticsExtensions
 {

@@ -7,7 +7,7 @@ namespace Module.Kitchen.Infrastructure;
 /// The internal persistence vault for the Kitchen module.
 /// This is hidden from all other modules.
 /// </summary>
-internal sealed class KitchenDbContext : DbContext
+internal sealed class KitchenDbContext(DbContextOptions<KitchenDbContext> options) : DbContext(options)
 {
     public DbSet<KitchenTicket> Tickets => Set<KitchenTicket>();
 

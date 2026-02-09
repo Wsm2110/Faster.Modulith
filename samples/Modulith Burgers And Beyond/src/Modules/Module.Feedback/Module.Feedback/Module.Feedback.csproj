@@ -7,12 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Application\EventHandlers\**" />
     <Compile Remove="Contracts\**" />
     <Compile Remove="Domain\**" />
     <Compile Remove="Infrastructure\**" />
+    <EmbeddedResource Remove="Application\EventHandlers\**" />
     <EmbeddedResource Remove="Contracts\**" />
     <EmbeddedResource Remove="Domain\**" />
     <EmbeddedResource Remove="Infrastructure\**" />
+    <None Remove="Application\EventHandlers\**" />
     <None Remove="Contracts\**" />
     <None Remove="Domain\**" />
     <None Remove="Infrastructure\**" />
@@ -22,11 +25,8 @@
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.2" />    
-    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.6" />
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.35" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Application\EventHandlers\" />
+    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.2" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.4" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\BurgersAndBeyond.Shared\BurgersAndBeyond.Shared.csproj" />

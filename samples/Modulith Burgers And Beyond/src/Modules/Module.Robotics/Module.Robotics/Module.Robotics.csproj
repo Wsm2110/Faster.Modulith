@@ -7,8 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Application\CommandHandlers\**" />
     <Compile Remove="Application\EventHandlers\**" />
+    <EmbeddedResource Remove="Application\CommandHandlers\**" />
     <EmbeddedResource Remove="Application\EventHandlers\**" />
+    <None Remove="Application\CommandHandlers\**" />
     <None Remove="Application\EventHandlers\**" />
   </ItemGroup>
 
@@ -16,13 +19,10 @@
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.2" />    
-    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.6" />
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.35" OutputItemType="Analyzer" ReferenceOutputAssembly="false">
+    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.2" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.4" OutputItemType="Analyzer" ReferenceOutputAssembly="false">
      </PackageReference>  
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Application\CommandHandlers\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\BurgersAndBeyond.Shared\BurgersAndBeyond.Shared.csproj" />

@@ -7,8 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Application\CommandHandlers\**" />
+    <Compile Remove="Application\EventHandlers\**" />
     <Compile Remove="Contracts\**" />
+    <EmbeddedResource Remove="Application\CommandHandlers\**" />
+    <EmbeddedResource Remove="Application\EventHandlers\**" />
     <EmbeddedResource Remove="Contracts\**" />
+    <None Remove="Application\CommandHandlers\**" />
+    <None Remove="Application\EventHandlers\**" />
     <None Remove="Contracts\**" />
   </ItemGroup>
 
@@ -17,12 +23,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.2" />
-    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.6" />
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.35" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Application\CommandHandlers\" />
-    <Folder Include="Application\EventHandlers\" />
+    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.2" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.4" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Module.Ordering.Api\Module.Ordering.Api.csproj" />

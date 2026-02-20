@@ -1,6 +1,0 @@
-@BurgersAndBeyond.WebApi_HostAddress = http://localhost:5158
-
-GET {{BurgersAndBeyond.WebApi_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

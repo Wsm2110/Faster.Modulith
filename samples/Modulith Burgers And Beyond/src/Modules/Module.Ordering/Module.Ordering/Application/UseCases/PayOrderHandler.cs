@@ -1,6 +1,5 @@
 ﻿using Faster.Modulith.Contracts;
 using FluentValidation;
-using Module.Ordering.Domain;
 using Faster.Modulith;
 using Microsoft.EntityFrameworkCore;
 using Module.Ordering.Api.UseCases;
@@ -16,6 +15,7 @@ namespace Module.Ordering.Application.UseCases
     /// occurs during processing, a failure result is returned.</remarks>
     /// <param name="db">The database context used to access and update order data.</param>
     /// <param name="dispatcher">The dispatcher used to publish payment events to other modules, such as Billing or Analytics.</param>
+    [Expose("api/v1/orders/pay")]
     internal class PayOrderHandler(OrderingDbContext db, IOrderingDispatcher dispatcher) : IUseCaseHandler<PayOrderUseCase, Result>
     {
         /// <summary>

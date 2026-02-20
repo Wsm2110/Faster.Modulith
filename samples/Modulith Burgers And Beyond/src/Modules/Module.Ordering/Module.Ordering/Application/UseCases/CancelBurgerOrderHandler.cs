@@ -1,12 +1,13 @@
 ﻿using Faster.Modulith.Contracts;
 using Module.Ordering.Api.UseCases;
-using Module.Ordering.Domain;
+using Module.Ordering.Infrastructure;
 
 namespace Module.Ordering.Application.UseCases;
 
 /// <summary>
 /// Handles the cancellation of a burger order within the ordering module.
 /// </summary>
+[Expose("api/v1/orders/cancel")]
 internal sealed class CancelBurgerOrderHandler(OrderingDbContext db) : IUseCaseHandler<CancelBurgerOrderUseCase, Result>
 {
     public async ValueTask<Result> Handle(CancelBurgerOrderUseCase request, CancellationToken ct)

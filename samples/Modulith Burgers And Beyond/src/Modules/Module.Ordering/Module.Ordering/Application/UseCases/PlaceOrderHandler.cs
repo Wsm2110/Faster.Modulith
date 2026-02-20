@@ -1,5 +1,4 @@
-﻿using Faster.Modulith;
-using Faster.Modulith.Contracts;
+﻿using Faster.Modulith.Contracts;
 using Module.Ordering.Api.UseCases;
 using Module.Ordering.Domain;
 using Module.Ordering.Infrastructure;
@@ -15,9 +14,8 @@ namespace Module.Ordering.Application.UseCases;
 /// logged with UTC timestamps for traceability.</remarks>
 /// <param name="db">The database context used to persist burger orders to the internal ordering database. Cannot be null.</param>
 /// <param name="dispatcher">The dispatcher responsible for publishing events related to burger order placement. Cannot be null.</param>
-internal sealed class PlaceOrderHandler(
-    OrderingDbContext db,
-    IOrderingDispatcher dispatcher) : IUseCaseHandler<PlaceBurgerOrderUseCase, Result<Guid>>
+[Expose("api/v1/orders/place")]
+internal sealed class PlaceOrderHandler(OrderingDbContext db, IOrderingDispatcher dispatcher) : IUseCaseHandler<PlaceBurgerOrderUseCase, Result<Guid>>
 {
     /// <summary>
     /// Handles the placement of a burger order by coordinating domain logic, persisting the order, and notifying
@@ -47,7 +45,7 @@ internal sealed class PlaceOrderHandler(
 
         // 4. Orchestration: Dispatch the 'Aftermath' event [cite: 2026-01-08]
         // This is where the UseCase signals the Kitchen and Robotics modules.
-        dispatcher.PublishBurgerOrderPlaced(
+        await dispatcher.PublishBurgerOrderPlacedAsync(
             orderId,
             request.TableNumber,
             $"{request.BurgerName} (Instructions: {request.SpecialInstructions})", ct);

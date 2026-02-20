@@ -11,6 +11,7 @@ namespace Module.Feedback.Application.UseCases;
 /// The public entry point for customer feedback. 
 /// This UseCase orchestrates the saving, signaling, and escalation of feedback.
 /// </summary>
+[Expose("api/v1/feedback/submit")]
 internal class SubmitFeedbackHandler(IFeedbackDispatcher dispatcher) : IUseCaseHandler<SubmitFeedbackUseCase, Result>
 {
     private readonly SubmitFeedbackValidator _validator = new();

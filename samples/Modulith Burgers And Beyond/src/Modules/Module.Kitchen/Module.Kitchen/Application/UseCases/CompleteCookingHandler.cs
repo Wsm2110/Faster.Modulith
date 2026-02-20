@@ -15,7 +15,7 @@ namespace Module.Kitchen.Application.UseCases
     /// completion for auditing purposes.</remarks>
     /// <param name="db">The database context used to access and update kitchen ticket information.</param>
     /// <param name="dispatcher">The dispatcher responsible for publishing events related to food readiness.</param>
-    internal class CompleteCookingHandler(KitchenDbContext db, IRoboticsModule roboticsModule, IKitchenDispatcher dispatcher) : IUseCaseHandler<CompleteCookingUseCase, Result>
+    internal class CompleteCookingHandler(KitchenDbContext db, IRoboticsModule roboticsModule) : IUseCaseHandler<CompleteCookingUseCase, Result>
     {
         /// <summary>
         /// Handles the completion of a cooking operation by updating the status of the corresponding kitchen ticket and

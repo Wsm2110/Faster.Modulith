@@ -5,34 +5,56 @@ using System.Threading.Tasks;
 namespace Faster.Modulith.Contracts;
 
 /// <summary>
+/// Defines the category of the error to drive HTTP status codes.
+/// </summary>
+public enum ErrorType
+{
+    Failure,        // 400 Bad Request (Default)
+    Validation,     // 400 Bad Request
+    NotFound,       // 404 Not Found
+    Conflict,       // 409 Conflict
+    Unauthorized,   // 401 Unauthorized
+    Forbidden       // 403 Forbidden
+}
+
+/// <summary>
 /// Represents the outcome of an operation without a value.
 /// </summary>
 public readonly struct Result : IEquatable<Result>
 {
     public bool IsSuccess { get; }
     public string Error { get; }
+    public ErrorType ErrorType { get; }
     public bool IsFailure => !IsSuccess;
 
-    private Result(bool isSuccess, string error)
+    private Result(bool isSuccess, string error, ErrorType errorType)
     {
         IsSuccess = isSuccess;
         Error = error ?? string.Empty;
+        ErrorType = errorType;
     }
 
     /// <summary>
     /// Creates a successful result.
     /// </summary>
-    public static Result Success => new Result(true, string.Empty);
+    public static Result Success => new Result(true, string.Empty, ErrorType.Failure);
 
     /// <summary>
-    /// Creates a failed result.
+    /// Creates a failed result (defaults to 400 Bad Request).
     /// </summary>
-    public static Result Failure(string error)
+    public static Result Failure(string error, ErrorType errorType = ErrorType.Failure)
     {
         if (string.IsNullOrWhiteSpace(error))
             throw new ArgumentException("Error message must not be empty", nameof(error));
-        return new Result(false, error);
+        return new Result(false, error, errorType);
     }
+
+    // --- Status Code Factories ---
+    public static Result NotFound(string error = "Resource not found.") => Failure(error, ErrorType.NotFound);
+    public static Result Conflict(string error = "Resource conflict occurred.") => Failure(error, ErrorType.Conflict);
+    public static Result Unauthorized(string error = "Unauthorized access.") => Failure(error, ErrorType.Unauthorized);
+    public static Result Forbidden(string error = "Access forbidden.") => Failure(error, ErrorType.Forbidden);
+    public static Result Validation(string error) => Failure(error, ErrorType.Validation);
 
     /// <summary>
     /// Executes an action based on the result outcome.
@@ -46,14 +68,6 @@ public readonly struct Result : IEquatable<Result>
     /// <summary>
     /// Returns a value based on the result outcome.
     /// </summary>
-    /// <example>
-    /// <code>
-    /// string msg = result.Match(
-    ///     () => "Operation OK",
-    ///     err => $"Error: {err}"
-    /// );
-    /// </code>
-    /// </example>
     public TResult Match<TResult>(Func<TResult> success, Func<string, TResult> failure)
     {
         return IsSuccess ? success() : failure(Error);
@@ -63,24 +77,19 @@ public readonly struct Result : IEquatable<Result>
     /// Converts a non-generic Result to a generic Result&lt;T&gt;.
     /// </summary>
     public Result<T> To<T>(T value = default) =>
-        IsSuccess ? Result<T>.Success(value) : Result<T>.Failure(Error);
+        IsSuccess ? Result<T>.Success(value) : Result<T>.Failure(Error, ErrorType);
 
     /// <summary>
     /// Executes the next function if the current result is successful.
     /// </summary>
     public Result Bind(Func<Result> next)
     {
-        return IsSuccess ? next() : Failure(Error);
+        return IsSuccess ? next() : Failure(Error, ErrorType);
     }
 
     /// <summary>
     /// Wraps a function that might throw an exception into a Result.
     /// </summary>
-    /// <example>
-    /// <code>
-    /// var res = Result.Try(() => File.Delete("temp.txt"));
-    /// </code>
-    /// </example>
     public static Result Try(Action action, string errorMessagePrefix = "Operation failed")
     {
         try
@@ -110,14 +119,8 @@ public readonly struct Result : IEquatable<Result>
     }
 
     /// <summary>
-    /// Combines multiple results. Returns Success if all are successful, otherwise Failure with all errors joined.
+    /// Combines multiple results. Returns Success if all are successful, otherwise Failure.
     /// </summary>
-    /// <example>
-    /// <code>
-    /// var validation = Result.Combine(ValidateName(n), ValidateEmail(e));
-    /// if (validation.IsFailure) return validation;
-    /// </code>
-    /// </example>
     public static Result Combine(params Result[] results)
     {
         var errors = new List<string>();
@@ -131,11 +134,11 @@ public readonly struct Result : IEquatable<Result>
             : Success;
     }
 
-    public override string ToString() => IsSuccess ? "Success" : $"Failure: {Error}";
+    public override string ToString() => IsSuccess ? "Success" : $"Failure ({ErrorType}): {Error}";
 
     // Equality
     public override bool Equals(object obj) => obj is Result other && Equals(other);
-    public bool Equals(Result other) => IsSuccess == other.IsSuccess && Error == other.Error;
+    public bool Equals(Result other) => IsSuccess == other.IsSuccess && Error == other.Error && ErrorType == other.ErrorType;
     public static bool operator ==(Result left, Result right) => left.Equals(right);
     public static bool operator !=(Result left, Result right) => !left.Equals(right);
 }
@@ -147,33 +150,37 @@ public readonly struct Result<T> : IEquatable<Result<T>>
 {
     public bool IsSuccess { get; }
     public string Error { get; }
+    public ErrorType ErrorType { get; }
     public T Value { get; }
     public bool IsFailure => !IsSuccess;
 
-    private Result(bool isSuccess, T value, string error)
+    private Result(bool isSuccess, T value, string error, ErrorType errorType)
     {
         IsSuccess = isSuccess;
         Value = value;
         Error = error ?? string.Empty;
+        ErrorType = errorType;
     }
 
-    public static Result<T> Success(T value) => new Result<T>(true, value, string.Empty);
+    public static Result<T> Success(T value) => new Result<T>(true, value, string.Empty, ErrorType.Failure);
 
-    public static Result<T> Failure(string error)
+    public static Result<T> Failure(string error, ErrorType errorType = ErrorType.Failure)
     {
         if (string.IsNullOrWhiteSpace(error))
             throw new ArgumentException("Error message must not be empty", nameof(error));
-        return new Result<T>(false, default!, error);
+        return new Result<T>(false, default!, error, errorType);
     }
+
+    // --- Status Code Factories ---
+    public static Result<T> NotFound(string error = "Resource not found.") => Failure(error, ErrorType.NotFound);
+    public static Result<T> Conflict(string error = "Resource conflict occurred.") => Failure(error, ErrorType.Conflict);
+    public static Result<T> Unauthorized(string error = "Unauthorized access.") => Failure(error, ErrorType.Unauthorized);
+    public static Result<T> Forbidden(string error = "Access forbidden.") => Failure(error, ErrorType.Forbidden);
+    public static Result<T> Validation(string error) => Failure(error, ErrorType.Validation);
 
     /// <summary>
     /// Implicitly converts a value to a Success Result.
     /// </summary>
-    /// <example>
-    /// <code>
-    /// Result&lt;int&gt; GetId() => 5; // Automatically wrapped
-    /// </code>
-    /// </example>
     public static implicit operator Result<T>(T value) => Success(value);
 
     public void Match(Action<T> success, Action<string> failure)
@@ -187,32 +194,22 @@ public readonly struct Result<T> : IEquatable<Result<T>>
         return IsSuccess ? success(Value) : failure(Error);
     }
 
-    public Result ToResult() => IsSuccess ? Result.Success : Result.Failure(Error);
+    public Result ToResult() => IsSuccess ? Result.Success : Result.Failure(Error, ErrorType);
 
     /// <summary>
     /// Transforms the inner value if the result is successful.
     /// </summary>
-    /// <example>
-    /// <code>
-    /// result.Map(x => x.ToString());
-    /// </code>
-    /// </example>
     public Result<TOutput> Map<TOutput>(Func<T, TOutput> mapper)
     {
-        return IsSuccess ? Result<TOutput>.Success(mapper(Value)) : Result<TOutput>.Failure(Error);
+        return IsSuccess ? Result<TOutput>.Success(mapper(Value)) : Result<TOutput>.Failure(Error, ErrorType);
     }
 
     /// <summary>
     /// Chains another operation that returns a Result.
     /// </summary>
-    /// <example>
-    /// <code>
-    /// GetUser(id).Bind(user => GetOrders(user.Id));
-    /// </code>
-    /// </example>
     public Result<TOutput> Bind<TOutput>(Func<T, Result<TOutput>> next)
     {
-        return IsSuccess ? next(Value) : Result<TOutput>.Failure(Error);
+        return IsSuccess ? next(Value) : Result<TOutput>.Failure(Error, ErrorType);
     }
 
     /// <summary>
@@ -224,14 +221,14 @@ public readonly struct Result<T> : IEquatable<Result<T>>
         return predicate(Value) ? this : Failure(errorMessage);
     }
 
-    public override string ToString() => IsSuccess ? $"Success: {Value}" : $"Failure: {Error}";
+    public override string ToString() => IsSuccess ? $"Success: {Value}" : $"Failure ({ErrorType}): {Error}";
 
     // Equality
     public override bool Equals(object obj) => obj is Result<T> other && Equals(other);
     public bool Equals(Result<T> other)
     {
         if (IsSuccess != other.IsSuccess) return false;
-        if (!IsSuccess) return Error == other.Error;
+        if (!IsSuccess) return Error == other.Error && ErrorType == other.ErrorType;
         return EqualityComparer<T>.Default.Equals(Value, other.Value);
     }
     public static bool operator ==(Result<T> left, Result<T> right) => left.Equals(right);
@@ -245,23 +242,12 @@ public static class ResultExtensions
 {
     // --- TAP (Side Effects) ---
 
-    /// <summary>
-    /// Executes an action (e.g., logging) without modifying the result.
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// result.Tap(val => Log($"Got {val}"));
-    /// </code>
-    /// </example>
     public static Result<T> Tap<T>(this Result<T> result, Action<T> action)
     {
         if (result.IsSuccess) action(result.Value);
         return result;
     }
 
-    /// <summary>
-    /// Executes an async action (e.g., publishing event) without modifying the result.
-    /// </summary>
     public static async Task<Result<T>> TapAsync<T>(this Task<Result<T>> resultTask, Func<T, Task> action)
     {
         var result = await resultTask;
@@ -271,40 +257,25 @@ public static class ResultExtensions
 
     // --- ASYNC CHAINING ---
 
-    /// <summary>
-    /// Transforms a Task&lt;Result&lt;T&gt;&gt; into Task&lt;Result&lt;U&gt;&gt; asynchronously.
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// await GetUserAsync(id).MapAsync(u => u.Name);
-    /// </code>
-    /// </example>
     public static async Task<Result<U>> MapAsync<T, U>(this Task<Result<T>> resultTask, Func<T, Task<U>> mapper)
     {
         var result = await resultTask;
-        if (result.IsFailure) return Result<U>.Failure(result.Error);
+        // Propagate ErrorType
+        if (result.IsFailure) return Result<U>.Failure(result.Error, result.ErrorType);
+
         var newValue = await mapper(result.Value);
         return Result<U>.Success(newValue);
     }
 
-    /// <summary>
-    /// Chains a Task&lt;Result&lt;T&gt;&gt; with another async Result-returning function.
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// await GetUserAsync(id).BindAsync(u => UpdateUserAsync(u));
-    /// </code>
-    /// </example>
     public static async Task<Result<U>> BindAsync<T, U>(this Task<Result<T>> resultTask, Func<T, Task<Result<U>>> next)
     {
         var result = await resultTask;
-        if (result.IsFailure) return Result<U>.Failure(result.Error);
+        // Propagate ErrorType
+        if (result.IsFailure) return Result<U>.Failure(result.Error, result.ErrorType);
+
         return await next(result.Value);
     }
 
-    /// <summary>
-    /// Matches the result of a Task&lt;Result&lt;T&gt;&gt; asynchronously.
-    /// </summary>
     public static async Task<TOutput> MatchAsync<T, TOutput>(
         this Task<Result<T>> resultTask,
         Func<T, TOutput> onSuccess,

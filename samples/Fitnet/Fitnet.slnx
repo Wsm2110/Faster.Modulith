@@ -1,0 +1,33 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/BuildingBlocks/" />
+  <Folder Name="/src/Hosts/">
+    <Project Path="src/Host/Fitnet.Root.Console/Fitnet.Root.Console.csproj" Id="e99eaa7c-a2f2-4964-ab3b-de704a96e391" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Membership/">
+    <Project Path="src/modules/Module.Membership/Module.Membership.Api/Module.Membership.Api.csproj" />
+    <Project Path="src/modules/Module.Membership/Module.Membership/Module.Membership.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Offers/">
+    <Project Path="src/modules/Module.Offers/Module.Offers.Api/Module.Offers.Api.csproj" />
+    <Project Path="src/modules/Module.Offers/Module.Offers/Module.Offers.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Passes/">
+    <Project Path="src/modules/Module.Passes/Module.Passes.Api/Module.Passes.Api.csproj" />
+    <Project Path="src/modules/Module.Passes/Module.Passes/Module.Passes.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Reports/">
+    <Project Path="src/modules/Module.Reports/Module.Reports.Api/Module.Reports.Api.csproj" />
+    <Project Path="src/modules/Module.Reports/Module.Reports/Module.Reports.csproj" />
+  </Folder>
+  <Folder Name="/src/Shared/">
+    <Project Path="src/Shared/Template.Shared/Fitnet.Shared.csproj" Id="bd1fd1b8-ea2a-4d9c-91cd-7b630c849871" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Module.Membership.Tests/Module.Membership.Tests.csproj" />
+    <Project Path="tests/Module.Offers.Tests/Module.Offers.Tests.csproj" />
+    <Project Path="tests/Module.Passes.Tests/Module.Passes.Tests.csproj" />
+    <Project Path="tests/Module.Reports.Tests/Module.Reports.Tests.csproj" />
+  </Folder>
+</Solution>

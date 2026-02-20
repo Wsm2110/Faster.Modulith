@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Module.Kitchen.Infrastructure; // Note that we have to use this namespace.
@@ -23,11 +24,11 @@ public partial class KitchenExtensions
     {
         services.AddScoped<KitchenDbContext>();
 
-        // 4. Register your DbContext here
+
         services.AddDbContext<KitchenDbContext>(options =>
         {
-            // Hardcoded for example, usually you'd resolve IConfiguration to get connection string
-            options.UseMemoryCache(new MemoryCache(new MemoryDistributedCacheOptions()));
+            // Configuration logic matches your previous InMemory intent
+            options.UseInMemoryDatabase("KitchenDb");
         });
     }
 }

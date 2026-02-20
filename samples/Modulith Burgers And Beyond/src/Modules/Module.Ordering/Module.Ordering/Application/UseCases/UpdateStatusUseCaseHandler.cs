@@ -1,13 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Faster.Modulith.Contracts;
+﻿using Faster.Modulith.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Module.Ordering.Api.UseCases;
-using Module.Ordering.Domain;
+using Module.Ordering.Infrastructure;
 
 namespace Module.Ordering.Application.UseCases;
 
+/// <summary>
+/// Handles requests to update the status of an order.
+/// </summary>
+/// <remarks>If the specified order does not exist, the handler returns a failure result. An
+/// InvalidOperationException may be thrown if the status update operation fails.</remarks>
+/// <param name="db">The database context used to access and modify order data.</param>
+[Expose("api/v1/orders/update")] //Note: Automatically generates a minimalistic Api endpoint
 internal sealed class UpdateStatusHandler(OrderingDbContext db) : IUseCaseHandler<UpdateOrderStatusUseCase, Result>
 {
     /// <summary>

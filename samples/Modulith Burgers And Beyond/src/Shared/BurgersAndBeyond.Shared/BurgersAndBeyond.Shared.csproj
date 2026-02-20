@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.4" />
-    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.113" />
+    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.22" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
   </ItemGroup>
 

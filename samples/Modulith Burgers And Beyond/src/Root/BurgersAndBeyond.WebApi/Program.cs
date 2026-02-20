@@ -1,5 +1,6 @@
 using Faster.Modulith;
 using Microsoft.OpenApi;
+using Module.Ordering;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,8 +11,13 @@ builder.Services.AddModulith(builder.Configuration, options =>
         kitchenOptions.UseInMemory = true;
     });
 
-    options.AddOrdering();
+    options.AddOrdering(orderingOptions =>
+    {
+        orderingOptions.UseInMemory = true; 
+    });
+
     options.AddRobotics();
+    options.AddFeedback();
 });
 
 // --- Swagger Configuration ---
@@ -21,7 +27,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Faster Modulith API",
+        Title = "BurgersAndBeyond API",
         Version = "v1"
     });
 });
@@ -37,37 +43,12 @@ if (app.Environment.IsDevelopment())
     // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.)
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Faster Modulith API V1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "BurgersAndBeyond API");
         c.RoutePrefix = string.Empty; // Serve the UI at the root
     });
 }
 
 app.UseHttpsRedirection();
-
-// --- Post Office Endpoints ---
-
-app.MapPost("/orders", async (IOrderingModule module) =>
-{
-    Console.WriteLine($"[{DateTime.UtcNow}] Dispatching Burger Order ticket to the vault.");
-
-    // The CodeFix-generated Processor handles the rest.
-    var result = await module.PlaceBurgerOrder("Big Burger", 11, string.Empty, CancellationToken.None);
-
-    return result.IsSuccess
-        ? Results.Ok(result.Value)
-        : Results.BadRequest(result.Error);
-});
-
-app.MapGet("/orders/{id}", async (Guid id, IOrderingModule module) =>
-{
-    Console.WriteLine($"[{DateTime.UtcNow}] Querying vault for Order ID: {id}");
-
-    // Even for queries, we use the dispatcher to keep the vault internal.
-    var result = await module.PayOrder(id);
-
-    return result.IsSuccess
-        ? Results.Ok(result)
-        : Results.NotFound(result.Error);
-});
+app.MapOrderingEndpoints();
 
 app.Run();

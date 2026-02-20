@@ -12,6 +12,7 @@ namespace Module.Robotics.Application.UseCases;
 /// Orchestrates the physical delivery lifecycle of a food order.
 /// This handler is internal to the Robotics vault to protect hardware logic.
 /// </summary>
+[Expose("api/v1/robotics/deliverfood")]
 internal class DeliverFoodUseCaseHandler(
     RoboticsDbContext db,
     IRoboticsDispatcher dispatcher,
@@ -59,7 +60,7 @@ internal class DeliverFoodUseCaseHandler(
             await db.SaveChangesAsync(ct);
 
             // Signal the Ordering and Kitchen modules that the cycle is finished.
-            dispatcher.PublishDeliveryCycleCompleted(request.OrderId, ct);
+            await dispatcher.PublishDeliveryCycleCompletedAsync(request.OrderId, ct);
 
             return Result.Success;
         }

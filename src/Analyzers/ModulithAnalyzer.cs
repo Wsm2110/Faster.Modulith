@@ -9,6 +9,10 @@ using Microsoft.CodeAnalysis.Operations;
 
 namespace Faster.Modulith.Analyzers;
 
+/// <summary>
+/// A diagnostic analyzer responsible for enforcing strict architectural and structural rules 
+/// across the modular monolith. It validates module isolation, encapsulation, and dependency injection patterns.
+/// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class ModulithAnalyzer : DiagnosticAnalyzer
 {
@@ -46,6 +50,9 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor RuleNoPragmas = new("MOD023", "Pragma Suppression Forbidden", "Use [ArchitectureBypass] instead.", "Architecture", DiagnosticSeverity.Error, true);
     private static readonly DiagnosticDescriptor RuleMissingHandlerImpl = new("MOD024", "Missing Handler Implementation", "The class '{0}' looks like a {1} but does not implement '{2}'.", "Scaffolding", DiagnosticSeverity.Error, true);
 
+    /// <summary>
+    /// Gets the set of supported diagnostic rules enforced by this analyzer.
+    /// </summary>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(
         RuleIllegalReference, RuleServiceLocator, RuleDirectInstantiation, RuleProfileInstantiation,
         RuleInternalMessages, RulePublicUseCases, RuleInternalHandlers, RuleNoControllersInModule,
@@ -55,6 +62,10 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
         RuleStrictStructure, RuleNamespaceConvention, RuleNoPragmas, RuleMissingHandlerImpl
     );
 
+    /// <summary>
+    /// Initializes the analyzer and registers the necessary actions for syntax, symbol, and operation analysis.
+    /// </summary>
+    /// <param name="context">The analysis context.</param>
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -76,12 +87,18 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
     // 1. SYMBOL ANALYSIS (Structure, Encapsulation)
     // =================================================================================================
 
+    /// <summary>
+    /// Analyzes named types (classes, structs, interfaces, records) to enforce structural, 
+    /// naming, and encapsulation rules within the modules.
+    /// </summary>
+    /// <param name="context">The symbol analysis context.</param>
     private void AnalyzeNamedType(SymbolAnalysisContext context)
     {
         var symbol = (INamedTypeSymbol)context.Symbol;
-        if (symbol.IsAbstract || symbol.IsGenericType || symbol.IsImplicitlyDeclared) return;
+        if (symbol.IsAbstract || symbol.IsGenericType || symbol.IsImplicitlyDeclared || symbol.Locations.Length == 0) return;
 
-        string path = context.Symbol.Locations[0].SourceTree?.FilePath ?? "";
+        var primaryLocation = symbol.Locations[0];
+        string path = primaryLocation.SourceTree?.FilePath ?? "";
         if (path.IndexOf("Modules", StringComparison.OrdinalIgnoreCase) < 0) return;
 
         string assemblyName = symbol.ContainingAssembly.Name;
@@ -94,7 +111,7 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
 
         if (symbol.Name.EndsWith("Controller") || BaseTypeMatches(symbol, "ControllerBase"))
         {
-            context.ReportDiagnostic(Diagnostic.Create(RuleNoControllersInModule, symbol.Locations[0], symbol.Name));
+            context.ReportDiagnostic(Diagnostic.Create(RuleNoControllersInModule, primaryLocation, symbol.Name));
         }
 
         if (assemblyName.Contains(".Module."))
@@ -107,21 +124,21 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
                 string expectedFragment = $".Module.{moduleName}";
                 if (!fullNamespace.Contains(expectedFragment) && !IsBypassed(symbol, "MOD022"))
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(RuleNamespaceConvention, symbol.Locations[0], fullNamespace, string.Join(".", parts.Take(moduleIndex)), moduleName));
+                    context.ReportDiagnostic(Diagnostic.Create(RuleNamespaceConvention, primaryLocation, fullNamespace, string.Join(".", parts.Take(moduleIndex)), moduleName));
                 }
 
                 if (fullNamespace.StartsWith(assemblyName) && !IsBypassed(symbol, "MOD021"))
                 {
                     string relativeNs = fullNamespace.Substring(assemblyName.Length);
                     if (!symbol.Name.EndsWith("Dispatcher") && !symbol.Name.StartsWith("Generated") && !IsNamespaceAllowed(relativeNs))
-                        context.ReportDiagnostic(Diagnostic.Create(RuleStrictStructure, symbol.Locations[0], symbol.Name, fullNamespace));
+                        context.ReportDiagnostic(Diagnostic.Create(RuleStrictStructure, primaryLocation, symbol.Name, fullNamespace));
                 }
             }
         }
 
         if (fullNamespace.Contains(".Domain") && !symbol.IsRecord && symbol.DeclaredAccessibility == Accessibility.Public && symbol.TypeKind == TypeKind.Class && !IsBypassed(symbol, "MOD018"))
         {
-            context.ReportDiagnostic(Diagnostic.Create(RulePublicEntity, symbol.Locations[0], symbol.Name));
+            context.ReportDiagnostic(Diagnostic.Create(RulePublicEntity, primaryLocation, symbol.Name));
         }
 
         foreach (var iface in symbol.AllInterfaces)
@@ -131,35 +148,35 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
             {
                 // MOD006: Use Records (Only enforces if in API layer)
                 if (isInApi && !symbol.IsRecord && !IsBypassed(symbol, "MOD006"))
-                    context.ReportDiagnostic(Diagnostic.Create(RuleUseRecords, symbol.Locations[0], symbol.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(RuleUseRecords, primaryLocation, symbol.Name));
 
                 // MOD001: Internal Messages (Only enforce internal if NOT in Api)
                 if (!isInApi && symbol.DeclaredAccessibility == Accessibility.Public && !IsBypassed(symbol, "MOD001"))
-                    context.ReportDiagnostic(Diagnostic.Create(RuleInternalMessages, symbol.Locations[0], iface.Name, symbol.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(RuleInternalMessages, primaryLocation, iface.Name, symbol.Name));
 
                 // MOD007: Naming
                 if (!symbol.Name.EndsWith(iface.Name == "ICommand" ? "Command" : "Event") && !IsBypassed(symbol, "MOD007"))
-                    context.ReportDiagnostic(Diagnostic.Create(RuleNaming, symbol.Locations[0], symbol.Name, iface.Name, iface.Name == "ICommand" ? "Command" : "Event"));
+                    context.ReportDiagnostic(Diagnostic.Create(RuleNaming, primaryLocation, symbol.Name, iface.Name, iface.Name == "ICommand" ? "Command" : "Event"));
             }
             // === USE CASES ===
             else if (iface.Name == "IUseCase")
             {
                 if (symbol.DeclaredAccessibility != Accessibility.Public && !IsBypassed(symbol, "MOD002"))
-                    context.ReportDiagnostic(Diagnostic.Create(RulePublicUseCases, symbol.Locations[0], symbol.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(RulePublicUseCases, primaryLocation, symbol.Name));
 
                 if (!symbol.Name.EndsWith("UseCase") && !IsBypassed(symbol, "MOD007"))
-                    context.ReportDiagnostic(Diagnostic.Create(RuleNaming, symbol.Locations[0], symbol.Name, iface.Name, "UseCase"));
+                    context.ReportDiagnostic(Diagnostic.Create(RuleNaming, primaryLocation, symbol.Name, iface.Name, "UseCase"));
             }
             // === HANDLERS ===
             else if (iface.Name.StartsWith("ICommandHandler") || iface.Name.StartsWith("IEventHandler") || iface.Name.StartsWith("IUseCaseHandler"))
             {
                 if (symbol.DeclaredAccessibility == Accessibility.Public && !IsBypassed(symbol, "MOD003"))
-                    context.ReportDiagnostic(Diagnostic.Create(RuleInternalHandlers, symbol.Locations[0], symbol.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(RuleInternalHandlers, primaryLocation, symbol.Name));
 
                 if (iface.Name.Contains("IUseCaseHandler") && !fullNamespace.Contains(".Application.UseCases") && !IsBypassed(symbol, "MOD008"))
-                    context.ReportDiagnostic(Diagnostic.Create(RuleUseCaseLocation, symbol.Locations[0], symbol.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(RuleUseCaseLocation, primaryLocation, symbol.Name));
                 if (iface.Name.Contains("ICommandHandler") && !fullNamespace.Contains(".Application.CommandHandlers") && !IsBypassed(symbol, "MOD009"))
-                    context.ReportDiagnostic(Diagnostic.Create(RuleCommandLocation, symbol.Locations[0], symbol.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(RuleCommandLocation, primaryLocation, symbol.Name));
             }
         }
 
@@ -173,17 +190,17 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
             if (symbol.Name.EndsWith("EventHandler") || ContainsName("EventHandlers") || ContainsName("EventHandler"))
             {
                 if (!symbol.AllInterfaces.Any(i => i.Name.StartsWith("IEventHandler")))
-                    context.ReportDiagnostic(Diagnostic.Create(RuleMissingHandlerImpl, symbol.Locations[0], symbol.Name, "Event Handler", "IEventHandler"));
+                    context.ReportDiagnostic(Diagnostic.Create(RuleMissingHandlerImpl, primaryLocation, symbol.Name, "Event Handler", "IEventHandler"));
             }
             else if (symbol.Name.EndsWith("CommandHandler") || ContainsName("CommandHandlers") || ContainsName("CommandHandler"))
             {
                 if (!symbol.AllInterfaces.Any(i => i.Name.StartsWith("ICommandHandler")))
-                    context.ReportDiagnostic(Diagnostic.Create(RuleMissingHandlerImpl, symbol.Locations[0], symbol.Name, "Command Handler", "ICommandHandler"));
+                    context.ReportDiagnostic(Diagnostic.Create(RuleMissingHandlerImpl, primaryLocation, symbol.Name, "Command Handler", "ICommandHandler"));
             }
             else if (symbol.Name.EndsWith("UseCaseHandler") || ContainsName("UseCases") || ContainsName("UseCase"))
             {
                 if (!symbol.AllInterfaces.Any(i => i.Name.StartsWith("IUseCaseHandler")))
-                    context.ReportDiagnostic(Diagnostic.Create(RuleMissingHandlerImpl, symbol.Locations[0], symbol.Name, "UseCase Handler", "IUseCaseHandler"));
+                    context.ReportDiagnostic(Diagnostic.Create(RuleMissingHandlerImpl, primaryLocation, symbol.Name, "UseCase Handler", "IUseCaseHandler"));
             }
         }
     }
@@ -192,27 +209,46 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
     // 2. MEMBER ANALYSIS (Fields, Methods, Props)
     // =================================================================================================
 
+    /// <summary>
+    /// Analyzes fields and properties to prevent the usage of anti-patterns such as 
+    /// the Service Locator pattern or illegal type references.
+    /// </summary>
+    /// <param name="context">The symbol analysis context.</param>
     private void AnalyzeFieldAndProperty(SymbolAnalysisContext context)
     {
+        if (context.Symbol.Locations.Length == 0) return;
+        var primaryLocation = context.Symbol.Locations[0];
+
         var type = context.Symbol is IFieldSymbol f ? f.Type : ((IPropertySymbol)context.Symbol).Type;
         if (IsServiceLocator(type) && !IsBypassed(context.Symbol, "MOD025"))
-            context.ReportDiagnostic(Diagnostic.Create(RuleServiceLocator, context.Symbol.Locations[0], type.Name));
-        ValidateType(type, context, context.Symbol.Locations[0]);
+            context.ReportDiagnostic(Diagnostic.Create(RuleServiceLocator, primaryLocation, type.Name));
+        ValidateType(type, context, primaryLocation);
     }
 
+    /// <summary>
+    /// Analyzes method signatures to ensure compliance with architectural constraints, 
+    /// such as preventing IQueryable leakage and improper parameter injection.
+    /// </summary>
+    /// <param name="context">The symbol analysis context.</param>
     private void AnalyzeMethod(SymbolAnalysisContext context)
     {
         var method = (IMethodSymbol)context.Symbol;
-        if (method.ReturnType.Name.Contains("IQueryable") && !IsBypassed(method, "MOD017"))
-            context.ReportDiagnostic(Diagnostic.Create(RuleIQueryable, method.Locations[0], method.Name));
+        if (method.Locations.Length == 0) return;
+        var primaryLocation = method.Locations[0];
 
-        ValidateType(method.ReturnType, context, method.Locations[0]);
+        if (method.ReturnType.Name.Contains("IQueryable") && !IsBypassed(method, "MOD017"))
+            context.ReportDiagnostic(Diagnostic.Create(RuleIQueryable, primaryLocation, method.Name));
+
+        ValidateType(method.ReturnType, context, primaryLocation);
 
         foreach (var param in method.Parameters)
         {
+            if (param.Locations.Length == 0) continue;
+            var paramLocation = param.Locations[0];
+
             if (IsServiceLocator(param.Type) && !IsBypassed(method, "MOD025"))
-                context.ReportDiagnostic(Diagnostic.Create(RuleServiceLocator, param.Locations[0], param.Type.Name));
-            ValidateType(param.Type, context, param.Locations[0]);
+                context.ReportDiagnostic(Diagnostic.Create(RuleServiceLocator, paramLocation, param.Type.Name));
+            ValidateType(param.Type, context, paramLocation);
         }
     }
 
@@ -220,6 +256,11 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
     // 3. EXECUTABLE LOGIC (New, Var, Invocation)
     // =================================================================================================
 
+    /// <summary>
+    /// Analyzes object creation operations to detect manual instantiations of types 
+    /// that should be resolved via dependency injection or cross-module boundaries.
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
     private void AnalyzeObjectCreation(OperationAnalysisContext context)
     {
         var op = (IObjectCreationOperation)context.Operation;
@@ -232,6 +273,11 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// Analyzes variable declarations to ensure the declared types comply with 
+    /// modular isolation constraints.
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
     private void AnalyzeVariableDeclaration(OperationAnalysisContext context)
     {
         var op = (IVariableDeclarationOperation)context.Operation;
@@ -241,6 +287,11 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// Analyzes method invocations to identify and prevent logic risks such as 
+    /// recursive calls, command chaining, and direct event chaining.
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
     private void AnalyzeInvocation(OperationAnalysisContext context)
     {
         var invocation = (IInvocationOperation)context.Operation;
@@ -272,18 +323,44 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// Analyzes the body of 'Handle' methods within handlers to verify complexity metrics, 
+    /// limiting orchestrator call depth and command dispatch counts.
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
     private void AnalyzeMethodBody(OperationAnalysisContext context)
     {
         var methodBody = (IMethodBodyOperation)context.Operation;
         var methodSymbol = context.ContainingSymbol as IMethodSymbol;
-        if (methodSymbol == null || methodSymbol.Name != "Handle") return; var containingType = methodSymbol.ContainingType;
-        bool isUseCaseHandler = containingType.AllInterfaces.Any(i => i.Name.StartsWith("IUseCaseHandler")); if (!isUseCaseHandler && !containingType.AllInterfaces.Any(i => i.Name.StartsWith("ICommandHandler"))) return;
-        int orchestratorCalls = 0; int commandCalls = 0;
-        foreach (var op in methodBody.Descendants()) { if (op is IInvocationOperation inv) { if (inv.TargetMethod.Name == "Execute" && inv.TargetMethod.ContainingType.Name == "IOrchestrator") orchestratorCalls++; if (inv.TargetMethod.Name == "Send" && inv.TargetMethod.ContainingType.Name.EndsWith("Dispatcher")) commandCalls++; } }
-        if (orchestratorCalls >= 3 && !IsBypassed(containingType, "MOD012")) context.ReportDiagnostic(Diagnostic.Create(RuleMaxDepth, methodSymbol.Locations[0]));
-        if (isUseCaseHandler && commandCalls > 5 && !IsBypassed(containingType, "MOD014")) context.ReportDiagnostic(Diagnostic.Create(RuleTooManyCommands, methodSymbol.Locations[0], containingType.Name, commandCalls));
+        if (methodSymbol == null || methodSymbol.Name != "Handle" || methodSymbol.Locations.Length == 0) return;
+
+        var primaryLocation = methodSymbol.Locations[0];
+        var containingType = methodSymbol.ContainingType;
+
+        bool isUseCaseHandler = containingType.AllInterfaces.Any(i => i.Name.StartsWith("IUseCaseHandler"));
+        if (!isUseCaseHandler && !containingType.AllInterfaces.Any(i => i.Name.StartsWith("ICommandHandler"))) return;
+
+        int orchestratorCalls = 0;
+        int commandCalls = 0;
+
+        foreach (var op in methodBody.Descendants())
+        {
+            if (op is IInvocationOperation inv)
+            {
+                if (inv.TargetMethod.Name == "Execute" && inv.TargetMethod.ContainingType.Name == "IOrchestrator") orchestratorCalls++;
+                if (inv.TargetMethod.Name == "Send" && inv.TargetMethod.ContainingType.Name.EndsWith("Dispatcher")) commandCalls++;
+            }
+        }
+
+        if (orchestratorCalls >= 3 && !IsBypassed(containingType, "MOD012")) context.ReportDiagnostic(Diagnostic.Create(RuleMaxDepth, primaryLocation));
+        if (isUseCaseHandler && commandCalls > 5 && !IsBypassed(containingType, "MOD014")) context.ReportDiagnostic(Diagnostic.Create(RuleTooManyCommands, primaryLocation, containingType.Name, commandCalls));
     }
 
+    /// <summary>
+    /// Analyzes pragma directives to forbid the manual suppression of architectural 
+    /// warnings via `#pragma warning disable`, enforcing the use of `[ArchitectureBypass]`.
+    /// </summary>
+    /// <param name="context">The syntax node analysis context.</param>
     private void AnalyzePragma(SyntaxNodeAnalysisContext context)
     {
         if (context.Node is not PragmaWarningDirectiveTriviaSyntax pragma) return;
@@ -295,6 +372,14 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
     // HELPERS & VALIDATION CORE
     // =================================================================================================
 
+    /// <summary>
+    /// Core validation method that checks if a type reference crosses forbidden 
+    /// module boundaries. Emits diagnostics for illegal references and direct instantiations.
+    /// </summary>
+    /// <param name="type">The symbol type being evaluated.</param>
+    /// <param name="context">The unified analysis context wrapper.</param>
+    /// <param name="location">The location in source code where the violation occurred.</param>
+    /// <param name="isInstantiation">Flag indicating if the type is being manually instantiated.</param>
     private void ValidateType(ITypeSymbol type, AnalysisContextWrapper context, Location location, bool isInstantiation = false)
     {
         if (type == null || type.SpecialType != SpecialType.None || type is IArrayTypeSymbol) return;
@@ -332,6 +417,9 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// Determines if an assembly reference is considered globally safe (e.g., System, Microsoft, Contracts).
+    /// </summary>
     private bool IsSafeReference(string name)
     {
         if (string.IsNullOrEmpty(name)) return true;
@@ -339,12 +427,35 @@ public class ModulithAnalyzer : DiagnosticAnalyzer
             || name.EndsWith(".Api") || name.EndsWith(".Contracts") || name.EndsWith(".Shared");
     }
 
+    /// <summary>
+    /// Determines if a given type symbol represents the IServiceProvider pattern.
+    /// </summary>
     private bool IsServiceLocator(ITypeSymbol type) { if (type == null) return false; return type.Name == "IServiceProvider" || type.Name == "ServiceProvider"; }
+
+    /// <summary>
+    /// Checks if the namespace structure follows the mandated folder hierarchy for the module.
+    /// </summary>
     private bool IsNamespaceAllowed(string relativeNs) { if (string.IsNullOrEmpty(relativeNs)) return true; if (relativeNs.StartsWith(".Contracts") || relativeNs.StartsWith(".Api") || relativeNs.StartsWith(".Domain") || relativeNs.StartsWith(".Shared") || relativeNs.StartsWith(".Infrastructure")) return true; if (relativeNs.StartsWith(".Application")) { if (relativeNs.StartsWith(".Application.UseCases") || relativeNs.StartsWith(".Application.CommandHandlers") || relativeNs.StartsWith(".Application.QueryHandlers") || relativeNs.StartsWith(".Application.EventHandlers")) return true; return false; } return false; }
+
+    /// <summary>
+    /// Verifies if a symbol or its containing type is decorated with the [ArchitectureBypass] attribute for a specific rule.
+    /// </summary>
     private static bool IsBypassed(ISymbol symbol, string ruleId) { if (symbol == null) return false; foreach (var attr in symbol.GetAttributes()) { if (attr.AttributeClass?.Name == "ArchitectureBypassAttribute") { if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is string bypassedId && bypassedId == ruleId) return true; } } return symbol.ContainingType != null && IsBypassed(symbol.ContainingType, ruleId); }
+
+    /// <summary>
+    /// Checks if a type inherits from a specific base class by recursively walking up the inheritance tree.
+    /// </summary>
     private static bool BaseTypeMatches(ITypeSymbol type, string targetName) { while (type.BaseType != null) { if (type.BaseType.Name == targetName) return true; type = type.BaseType; } return false; }
+
+    /// <summary>
+    /// Checks if a type implements a specified interface by name.
+    /// </summary>
     private static bool ImplementsInterface(ITypeSymbol type, string interfaceName) => type.AllInterfaces.Any(i => i.Name.Contains(interfaceName));
 
+    /// <summary>
+    /// A lightweight wrapper struct to unify SymbolAnalysisContext and OperationAnalysisContext 
+    /// for shared validation methods.
+    /// </summary>
     private struct AnalysisContextWrapper
     {
         private readonly Action<Diagnostic> _report;

@@ -1,5 +1,8 @@
 <Solution>
   <Folder Name="/src/" />
+  <Folder Name="/src/Host/">
+    <Project Path="src/Root/BurgersAndBeyond.WebApi/BurgersAndBeyond.WebApi.csproj" Id="c688b993-b792-4353-b2fe-dd46a8f31604" />
+  </Folder>
   <Folder Name="/src/Modules/" />
   <Folder Name="/src/Modules/Feedback/">
     <Project Path="src/modules/Module.Feedback/Module.Feedback.Api/Module.Feedback.Api.csproj" />
@@ -17,9 +20,6 @@
     <Project Path="src/modules/Module.Robotics/Module.Robotics.Api/Module.Robotics.Api.csproj" />
     <Project Path="src/modules/Module.Robotics/Module.Robotics/Module.Robotics.csproj" />
   </Folder>
-  <Folder Name="/src/Root/">
-    <Project Path="src/Root/BurgersAndBeyond.WebApi/BurgersAndBeyond.WebApi.csproj" Id="c688b993-b792-4353-b2fe-dd46a8f31604" />
-  </Folder>
   <Folder Name="/src/Shared/">
     <Project Path="src/Shared/BurgersAndBeyond.Shared/BurgersAndBeyond.Shared.csproj" Id="887a1702-eec8-4f14-bc9e-1cbb81c0a560" />
   </Folder>
@@ -27,6 +27,7 @@
     <Project Path="tests/Module.Feedback.Tests/Module.Feedback.Tests.csproj" />
     <Project Path="tests/Module.Kitchen.Tests/Module.Kitchen.Tests.csproj" />
     <Project Path="tests/Module.Ordering.Tests/Module.Ordering.Tests.csproj" />
+    <Project Path="tests/Module.Remember.Tests/Module.Remember.Tests.csproj" />
     <Project Path="tests/Module.Robotics.Tests/Module.Robotics.Tests.csproj" />
   </Folder>
 </Solution>

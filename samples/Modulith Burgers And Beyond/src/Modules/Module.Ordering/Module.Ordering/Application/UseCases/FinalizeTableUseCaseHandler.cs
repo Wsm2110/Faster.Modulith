@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Faster.Modulith.Contracts;
-using Module.Ordering.Domain;
 using Module.Ordering.Api.UseCases;
 using Module.Ordering.Infrastructure;
 
@@ -17,6 +16,7 @@ namespace Module.Ordering.Application.UseCases;
 /// </remarks>
 /// <param name="db">The database context used to access and update order information.</param>
 /// <param name="dispatcher">The dispatcher responsible for orchestrating subsequent actions after a table's orders are finalized.</param>
+[Expose("api/v1/orders/finalize")]
 internal sealed class FinalizeTableHandler(OrderingDbContext db, IOrderingDispatcher dispatcher) : IUseCaseHandler<FinalizeTableOrderUseCase, Result<decimal>>
 {
     public async ValueTask<Result<decimal>> Handle(FinalizeTableOrderUseCase request, CancellationToken ct)

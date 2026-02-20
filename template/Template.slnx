@@ -6,7 +6,9 @@
     <Project Path="src/Modules/Module.MyFirstModule/Module.MyFirstModule.Api/Module.MyFirstModule.Api.csproj" />
     <Project Path="src/Modules/Module.MyFirstModule/Module.MyFirstModule/Module.MyFirstModule.csproj" />
   </Folder>
-  <Folder Name="/src/Root/" />
+  <Folder Name="/src/Root/">
+    <Project Path="src/Host/Template.Console/Template.Console.csproj" />
+  </Folder>
   <Folder Name="/src/Shared/">
     <Project Path="src/Shared/Template.Shared/Template.Shared.csproj" Id="bd1fd1b8-ea2a-4d9c-91cd-7b630c849871" />
   </Folder>

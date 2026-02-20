@@ -21,6 +21,10 @@
     <Project Path="src/modules/Module.Reports/Module.Reports.Api/Module.Reports.Api.csproj" />
     <Project Path="src/modules/Module.Reports/Module.Reports/Module.Reports.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Test/">
+    <Project Path="src/modules/Module.Test/Module.Test.Api/Module.Test.Api.csproj" />
+    <Project Path="src/modules/Module.Test/Module.Test/Module.Test.csproj" />
+  </Folder>
   <Folder Name="/src/Shared/">
     <Project Path="src/Shared/Template.Shared/Fitnet.Shared.csproj" Id="bd1fd1b8-ea2a-4d9c-91cd-7b630c849871" />
   </Folder>
@@ -29,5 +33,6 @@
     <Project Path="tests/Module.Offers.Tests/Module.Offers.Tests.csproj" />
     <Project Path="tests/Module.Passes.Tests/Module.Passes.Tests.csproj" />
     <Project Path="tests/Module.Reports.Tests/Module.Reports.Tests.csproj" />
+    <Project Path="tests/Module.Test.Tests/Module.Test.Tests.csproj" />
   </Folder>
 </Solution>

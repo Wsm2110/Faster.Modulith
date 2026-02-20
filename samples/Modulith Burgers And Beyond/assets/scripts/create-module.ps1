@@ -199,7 +199,7 @@ public static partial class ${Name}Extensions
         $optionsFilePath = Join-Path $implProjectPath "Infrastructure\${Name}Options.cs"
         
         $optionsContent = @"
-namespace Faster.Modulith;
+namespace $moduleName.Infrastructure;
 
 /// <summary>
 /// Provides configuration options for the ${Name} module.

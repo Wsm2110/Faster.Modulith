@@ -1,14 +1,6 @@
 <#
 .SYNOPSIS
     Creates a new Module with the specific "Application/Domain/Infrastructure" structure for .NET.
-
-.DESCRIPTION
-    This script scaffolds a new module following the modular monolith architecture pattern.
-    
-    File System Structure:
-      src/modules/Module.{Name}/Module.{Name}/       -> Implementation project
-      src/modules/Module.{Name}/Module.{Name}.Api/   -> Api project
-      tests/Module.{Name}.Tests/                     -> Test project
 #>
 
 param(
@@ -19,10 +11,13 @@ param(
     [string]$SolutionPath,
 
     [Parameter(Mandatory=$false)]
-    [string]$FrameworkVersion = "net10.0",
+    [string]$FrameworkVersion = "net8.0",
 
     [Parameter(Mandatory=$false)]
-    [switch]$SkipRestore
+    [switch]$SkipRestore,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$AspNetCore
 )
 
 # --- Configuration ---
@@ -36,11 +31,11 @@ $testProjectName = "$moduleName.$testsSuffix"
 
 # Framework & Versions
 $frameworkVersion = $FrameworkVersion
-$vExtensions = "10.0.2"
+$vExtensions = "9.0.0" 
 $vImmutable  = "9.0.0"
 $vContracts  = "1.0.*"
 $vAnalyzers  = "1.0.*"
-$vFluent     = "12.1.1"
+$vFluent     = "11.9.0"
 
 # ----------------------------------------------------------------
 # 0. Intelligent Solution Root Discovery
@@ -91,10 +86,23 @@ if ($Name -match $invalidChars) {
 }
 
 Write-Host "Creating module: $Name ($FrameworkVersion)" -ForegroundColor Cyan
+if ($AspNetCore) { Write-Host "ASP.NET Core Framework Reference: Enabled" -ForegroundColor Cyan }
 Write-Host "Target Solution: $SolutionPath" -ForegroundColor DarkGray
 
 $executionLocation = Get-Location
 Set-Location $solutionRoot
+
+# Prepare the ASP.NET Core XML block
+$aspNetCoreXml = ""
+if ($AspNetCore) {
+    $aspNetCoreXml = @"
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+"@
+}
 
 try {
     # ----------------------------------------------------------------
@@ -137,7 +145,10 @@ try {
 
         $apiCsproj = "$apiProjectPath/$apiProjectName.csproj"
         $apiXml = Get-Content $apiCsproj -Raw
+        
+        # Inject AspNetCore block + Packages
         $apiInject = @"
+$aspNetCoreXml
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$vExtensions" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="$vExtensions" />        
@@ -161,9 +172,67 @@ try {
         foreach ($f in $folders) { New-Item -Path "$implProjectPath/$f" -ItemType Directory -Force | Out-Null }
         Remove-Item "$implProjectPath/Class1.cs" -ErrorAction SilentlyContinue
 
+        # --- Create {ModuleName}Extensions.cs (IN INFRASTRUCTURE) ---
+        $extFilePath = Join-Path $implProjectPath "Infrastructure\${Name}Extensions.cs"
+        
+        $extContent = @"
+using Microsoft.Extensions.DependencyInjection;
+
+namespace $moduleName.Infrastructure;
+
+/// <summary>
+/// Extension methods for registering module-specific dependencies.
+/// </summary>
+public static partial class ${Name}Extensions
+{
+    /// <summary>
+    /// Adds infrastructure dependencies.
+    /// </summary>
+    static partial void AddInfrastructure(IServiceCollection services)
+    {
+    }
+}
+"@
+        Set-Content -Path $extFilePath -Value $extContent
+
+        # --- Create {ModuleName}Options.cs (IN INFRASTRUCTURE) ---
+        $optionsFilePath = Join-Path $implProjectPath "Infrastructure\${Name}Options.cs"
+        
+        $optionsContent = @"
+namespace $moduleName.Infrastructure;
+
+/// <summary>
+/// Provides configuration options for the ${Name} module.
+/// </summary>
+public partial class ${Name}Options
+{
+}
+"@
+        Set-Content -Path $optionsFilePath -Value $optionsContent
+
+        # --- Create {ModuleName}Endpoints.cs (IN ROOT) ---
+        $endpointsPath = Join-Path $implProjectPath "${Name}Endpoints.cs"
+        
+        $endpointsContent = @"
+namespace Faster.Modulith;
+
+/// <summary>
+/// Defines the HTTP endpoints for the ${Name} module.
+/// </summary>
+public static partial class ${Name}Endpoints
+{
+    // This partial class is extended by the Source Generator to include Map${Name}Endpoints()
+}
+"@
+        Set-Content -Path $endpointsPath -Value $endpointsContent
+
+
         $implCsproj = "$implProjectPath/$moduleName.csproj"
         $implXml = Get-Content $implCsproj -Raw
+
+        # Inject AspNetCore block + Packages
         $implInject = @"
+$aspNetCoreXml
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="$vFluent" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$vExtensions" />

@@ -30,10 +30,10 @@ if "%MODULE_NAME%"=="" (
 
 echo.
 echo Available .NET versions:
-echo   1. net10.0 (default)
-echo   2. net9.0
-echo   3. net8.0
-echo   4. Custom
+echo    1. net10.0 (default)
+echo    2. net9.0
+echo    3. net8.0
+echo    4. Custom
 echo.
 
 set VERSION_CHOICE=
@@ -62,13 +62,37 @@ if "%FRAMEWORK_VERSION%"=="" (
 
 echo.
 echo ========================================
+echo ASP.NET Core Configuration
+echo ========================================
+echo.
+echo Do you want to enable ASP.NET Core support?
+echo This allows the generated module to use IEndpointRouteBuilder (Minimal APIs).
+echo.
+
+set ASPNET_CHOICE=
+set /p ASPNET_CHOICE="Enable ASP.NET Core support? (Y/N) [N]: "
+
+REM Default to No if empty
+if "%ASPNET_CHOICE%"=="" set ASPNET_CHOICE=N
+
+REM Set the parameter variable
+set ASPNET_PARAM=
+if /i "%ASPNET_CHOICE%"=="Y" set ASPNET_PARAM=-AspNetCore
+
+echo.
+echo ========================================
 echo Creating module: %MODULE_NAME%
 echo Framework: %FRAMEWORK_VERSION%
+if /i "%ASPNET_CHOICE%"=="Y" (
+    echo ASP.NET Core: Enabled
+) else (
+    echo ASP.NET Core: Disabled
+)
 echo ========================================
 echo.
 
-REM Execute PowerShell script
-powershell.exe -ExecutionPolicy Bypass -File "%~dp0/assets/scripts/create-module.ps1" -Name "%MODULE_NAME%" -FrameworkVersion "%FRAMEWORK_VERSION%"
+REM Execute PowerShell script with the new conditional parameter
+powershell.exe -ExecutionPolicy Bypass -File "%~dp0/assets/scripts/create-module.ps1" -Name "%MODULE_NAME%" -FrameworkVersion "%FRAMEWORK_VERSION%" %ASPNET_PARAM%
 
 if %ERRORLEVEL% NEQ 0 (
     echo.

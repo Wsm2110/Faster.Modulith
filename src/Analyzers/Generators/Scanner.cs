@@ -44,8 +44,7 @@ public static class Scanner
     /// <returns>
     /// Tuple containing discovered artifacts and whether manual pipelines were detected.
     /// </returns>
-    public static (List<HandlerInfo> Items, bool HasManualPipelines)
-        ScanTypes(Compilation compilation, CancellationToken ct)
+    public static (List<HandlerInfo> Items, bool HasManualPipelines) ScanTypes(Compilation compilation, CancellationToken ct)
     {
         var results = new List<HandlerInfo>();
         bool hasManualPipelines = false;
@@ -318,7 +317,8 @@ public static class Scanner
         if (source is INamedTypeSymbol namedSource)
         {
             var ctor = namedSource.InstanceConstructors
-                .Where(c => c.DeclaredAccessibility == Accessibility.Public)
+                .Where(c => c.DeclaredAccessibility == Accessibility.Public ||
+                            c.DeclaredAccessibility == Accessibility.Internal)
                 .OrderByDescending(c => c.Parameters.Length)
                 .FirstOrDefault();
 
@@ -351,6 +351,3 @@ public static class Scanner
         );
     }
 }
-
-
-

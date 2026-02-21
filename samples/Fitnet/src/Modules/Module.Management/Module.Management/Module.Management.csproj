@@ -6,15 +6,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="11.9.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />    
     <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.*" />
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.31" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.*" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Application\UseCases\" />
@@ -23,10 +21,9 @@
     <Folder Include="Contracts\" />
     <Folder Include="Domain\" />
     <Folder Include="Infrastructure\" />
-    <Folder Include="Extensions\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Module.Remember.Api\Module.Remember.Api.csproj" />
+    <ProjectReference Include="..\Module.Management.Api\Module.Management.Api.csproj" />
   </ItemGroup>
 </Project>
 

@@ -12,15 +12,10 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />    
     <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.*" />
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.5" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.6" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Application\UseCases\" />
     <Folder Include="Application\EventHandlers\" />
-    <Folder Include="Application\CommandHandlers\" />
-    <Folder Include="Contracts\" />
-    <Folder Include="Domain\" />
-    <Folder Include="Infrastructure\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Module.Membership.Api\Module.Membership.Api.csproj" />

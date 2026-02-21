@@ -14,7 +14,7 @@ using Faster.Modulith;
 
 namespace Module.Membership.Application.UseCases
 {
-    internal class PrepareMembershipHandler(IMembershipModule module, IMembershipRepository Repository, IMembershipDispatcher dispatcher) : IUseCaseHandler<PrepareMembershipUseCase, Result<Guid>>
+    internal class PrepareMembershipHandler(IMembershipRepository Repository, IMembershipDispatcher dispatcher) : IUseCaseHandler<PrepareMembershipUseCase, Result<Guid>>
     {
         public async ValueTask<Result<Guid>> Handle(PrepareMembershipUseCase useCase, CancellationToken ct)
         {
@@ -22,11 +22,9 @@ namespace Module.Membership.Application.UseCases
 
             var contract = new Contract(useCase.CustomerId, useCase.PlanType);
 
-            var result = await dispatcher.MembershipDiscount(new MembershipDiscountCommand());
+            var result = await dispatcher.MembershipDiscount(new MembershipDiscountCommand(contract));
 
-            await Repository.SaveAsync(contract);
-
-            await module.PrepareMembership();
+            await Repository.SaveAsync(contract);         
 
             return result.IsSuccess ? Result<Guid>.Success(Guid.NewGuid()) : Result<Guid>.Failure(result.Error);
         }

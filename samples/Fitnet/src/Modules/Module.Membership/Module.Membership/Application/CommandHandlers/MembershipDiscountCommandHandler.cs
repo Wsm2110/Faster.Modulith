@@ -7,24 +7,26 @@ using FluentValidation;
 using Faster.Modulith.Contracts;
 using Module.Membership.Domain;
 
-namespace Module.Membership.Application.CommandHandlers;
-
-internal class MembershipDiscountCommandHandler : ICommandHandler<MembershipDiscountCommand, Result>
+namespace Module.Membership.Application.CommandHandlers
 {
-    public async ValueTask<Result> Handle(MembershipDiscountCommand command, CancellationToken ct)
+
+    internal class MembershipDiscountCommandHandler : ICommandHandler<MembershipDiscountCommand, Result>
     {
-        throw new NotImplementedException();
+        public async ValueTask<Result> Handle(MembershipDiscountCommand command, CancellationToken ct)
+        {
+            throw new NotImplementedException();
+        }
     }
-}
 
-internal record MembershipDiscountCommand(Contract Contract) : ICommand<Result>
-{
-}
-
-internal class MembershipDiscountValidator : AbstractValidator<MembershipDiscountCommand>
-{
-    public MembershipDiscountValidator()
+    internal record MembershipDiscountCommand(Contract Contract) : ICommand<Result>
     {
-        // RuleFor(c => c.Id).NotEqual(0).WithMessage("Id cannot be 0");
+    }
+
+    internal class MembershipDiscountValidator : AbstractValidator<MembershipDiscountCommand>
+    {
+        public MembershipDiscountValidator()
+        {
+            // RuleFor(c => c.Id).NotEqual(0).WithMessage("Id cannot be 0");
+        }
     }
 }

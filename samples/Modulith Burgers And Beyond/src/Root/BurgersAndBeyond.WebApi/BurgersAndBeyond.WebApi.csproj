@@ -7,8 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.22" />
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.113" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.6" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.1" />
   </ItemGroup>

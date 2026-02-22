@@ -20,6 +20,15 @@ param(
     [switch]$AspNetCore
 )
 
+function Write-Log {
+    param(
+        [string]$Message,
+        [ConsoleColor]$ForegroundColor = "White"
+    )
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    Write-Host "[$timestamp] $Message" -ForegroundColor $ForegroundColor
+}
+
 # --- Configuration ---
 $prefix = "Module"
 $apiSuffix = "Api"
@@ -34,7 +43,7 @@ $frameworkVersion = $FrameworkVersion
 $vExtensions = "9.0.0" 
 $vImmutable  = "9.0.0"
 $vContracts  = "1.0.*"
-$vAnalyzers  = "1.0.*"
+$vAnalyzers  = "1.1.*"
 $vFluent     = "11.9.0"
 
 # ----------------------------------------------------------------
@@ -72,7 +81,7 @@ if (-not $targetSolutionFile) {
 }
 
 if (-not $targetSolutionFile) {
-    Write-Host "ERROR: Could not locate a .sln or .slnx file." -ForegroundColor Red
+    Write-Log "ERROR: Could not locate a .sln or .slnx file." -ForegroundColor Red
     exit 1
 }
 
@@ -81,13 +90,13 @@ $SolutionPath = $targetSolutionFile.FullName
 
 $invalidChars = '[^a-zA-Z0-9_]'
 if ($Name -match $invalidChars) {
-    Write-Host "ERROR: Module name can only contain letters, numbers, and underscores" -ForegroundColor Red
+    Write-Log "ERROR: Module name can only contain letters, numbers, and underscores" -ForegroundColor Red
     exit 1
 }
 
-Write-Host "Creating module: $Name ($FrameworkVersion)" -ForegroundColor Cyan
-if ($AspNetCore) { Write-Host "ASP.NET Core Framework Reference: Enabled" -ForegroundColor Cyan }
-Write-Host "Target Solution: $SolutionPath" -ForegroundColor DarkGray
+Write-Log "Creating module: $Name ($FrameworkVersion)" -ForegroundColor Cyan
+if ($AspNetCore) { Write-Log "ASP.NET Core Framework Reference: Enabled" -ForegroundColor Cyan }
+Write-Log "Target Solution: $SolutionPath" -ForegroundColor DarkGray
 
 $executionLocation = Get-Location
 Set-Location $solutionRoot
@@ -129,15 +138,9 @@ try {
     # ----------------------------------------------------------------
     # 2. Create Module Projects (API & Implementation)
     # ----------------------------------------------------------------
-    
-    # Create the module folder: src/modules/Module.{Name}
-    $moduleParentPath = Join-Path $modulesDirectory $moduleName
-    if (-not (Test-Path $moduleParentPath)) {
-        New-Item -Path $moduleParentPath -ItemType Directory | Out-Null
-    }
 
     # --- 2a. Create API Project ---
-    $apiProjectPath = Join-Path $moduleParentPath $apiProjectName
+    $apiProjectPath = Join-Path $modulesDirectory $apiProjectName
     if (-not (Test-Path "$apiProjectPath/$apiProjectName.csproj")) {
         dotnet new classlib -n $apiProjectName -o $apiProjectPath --framework $frameworkVersion --no-restore | Out-Null
         New-Item -Path "$apiProjectPath/Dto" -ItemType Directory -Force | Out-Null
@@ -151,8 +154,7 @@ try {
 $aspNetCoreXml
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$vExtensions" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="$vExtensions" />        
-    <PackageReference Include="Faster.Modulith.Contracts" Version="$vContracts" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="$vExtensions" />  
     <PackageReference Include="Faster.Modulith.Analyzers" Version="$vAnalyzers" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
@@ -164,7 +166,7 @@ $aspNetCoreXml
     }
 
     # --- 2b. Create Implementation Project ---
-    $implProjectPath = Join-Path $moduleParentPath $moduleName
+    $implProjectPath = Join-Path $modulesDirectory $moduleName
     if (-not (Test-Path "$implProjectPath/$moduleName.csproj")) {
         dotnet new classlib -n $moduleName -o $implProjectPath --framework $frameworkVersion --no-restore | Out-Null
 
@@ -178,7 +180,7 @@ $aspNetCoreXml
         $extContent = @"
 using Microsoft.Extensions.DependencyInjection;
 
-namespace $moduleName.Infrastructure;
+namespace ${moduleName}.Infrastructure;
 
 /// <summary>
 /// Extension methods for registering module-specific dependencies.
@@ -199,7 +201,7 @@ public static partial class ${Name}Extensions
         $optionsFilePath = Join-Path $implProjectPath "Infrastructure\${Name}Options.cs"
         
         $optionsContent = @"
-namespace $moduleName.Infrastructure;
+namespace ${moduleName}.Infrastructure;
 
 /// <summary>
 /// Provides configuration options for the ${Name} module.
@@ -210,11 +212,12 @@ public partial class ${Name}Options
 "@
         Set-Content -Path $optionsFilePath -Value $optionsContent
 
-        # --- Create {ModuleName}Endpoints.cs (IN ROOT) ---
-        $endpointsPath = Join-Path $implProjectPath "${Name}Endpoints.cs"
-        
-        $endpointsContent = @"
-namespace Faster.Modulith;
+        # --- Create {ModuleName}Endpoints.cs (IN ROOT) (ONLY IF ASP.NET CORE) ---
+        if ($AspNetCore) {
+            $endpointsPath = Join-Path $implProjectPath "${Name}Endpoints.cs"
+            
+            $endpointsContent = @"
+namespace ${moduleName};
 
 /// <summary>
 /// Defines the HTTP endpoints for the ${Name} module.
@@ -224,7 +227,8 @@ public static partial class ${Name}Endpoints
     // This partial class is extended by the Source Generator to include Map${Name}Endpoints()
 }
 "@
-        Set-Content -Path $endpointsPath -Value $endpointsContent
+            Set-Content -Path $endpointsPath -Value $endpointsContent
+        }
 
 
         $implCsproj = "$implProjectPath/$moduleName.csproj"
@@ -236,8 +240,7 @@ $aspNetCoreXml
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="$vFluent" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$vExtensions" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="$vExtensions" />    
-    <PackageReference Include="Faster.Modulith.Contracts" Version="$vContracts" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="$vExtensions" />       
     <PackageReference Include="Faster.Modulith.Analyzers" Version="$vAnalyzers" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
@@ -283,7 +286,7 @@ $aspNetCoreXml
     dotnet sln $SolutionPath add $implCsprojFile --solution-folder $moduleSolutionFolder > $null
     dotnet sln $SolutionPath add $testCsprojFile --solution-folder "tests" > $null
 
-    Write-Host "Done!" -ForegroundColor Green
+    Write-Log "Done!" -ForegroundColor Green
     
     if (-not $SkipRestore) {
         dotnet restore $apiCsprojFile --verbosity quiet
@@ -292,7 +295,7 @@ $aspNetCoreXml
     }
 
 } catch {
-    Write-Host "ERROR: An error occurred: $_" -ForegroundColor Red
+    Write-Log "ERROR: An error occurred: $_" -ForegroundColor Red
 } finally {
     Set-Location $executionLocation
 }

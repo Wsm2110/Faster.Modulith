@@ -8,8 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.3" />
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.1.0" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.1.2" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
@@ -17,14 +16,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\modules\Module.Membership\Module.Membership.Api\Module.Membership.Api.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Membership\Module.Membership\Module.Membership.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Offers\Module.Offers.Api\Module.Offers.Api.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Offers\Module.Offers\Module.Offers.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Passes\Module.Passes.Api\Module.Passes.Api.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Passes\Module.Passes\Module.Passes.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Reports\Module.Reports.Api\Module.Reports.Api.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Reports\Module.Reports\Module.Reports.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Membership.Api\Module.Membership.Api.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Membership\Module.Membership.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Offers.Api\Module.Offers.Api.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Offers\Module.Offers.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Passes.Api\Module.Passes.Api.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Passes\Module.Passes.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Reports.Api\Module.Reports.Api.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Reports\Module.Reports.csproj" />
   </ItemGroup>
 
 </Project>

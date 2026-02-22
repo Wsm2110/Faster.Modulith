@@ -5,20 +5,20 @@
   </Folder>
   <Folder Name="/src/Modules/" />
   <Folder Name="/src/Modules/Feedback/">
-    <Project Path="src/modules/Module.Feedback/Module.Feedback.Api/Module.Feedback.Api.csproj" />
-    <Project Path="src/modules/Module.Feedback/Module.Feedback/Module.Feedback.csproj" />
+    <Project Path="src/modules/Module.Feedback.Api/Module.Feedback.Api.csproj" />
+    <Project Path="src/modules/Module.Feedback/Module.Feedback.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Kitchen/">
-    <Project Path="src/modules/Module.Kitchen/Module.Kitchen.Api/Module.Kitchen.Api.csproj" />
-    <Project Path="src/modules/Module.Kitchen/Module.Kitchen/Module.Kitchen.csproj" />
+    <Project Path="src/modules/Module.Kitchen.Api/Module.Kitchen.Api.csproj" />
+    <Project Path="src/modules/Module.Kitchen/Module.Kitchen.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Ordering/">
-    <Project Path="src/Modules/Module.Ordering/Module.Ordering.Api/Module.Ordering.Api.csproj" />
-    <Project Path="src/Modules/Module.Ordering/Module.Ordering/Module.Ordering.csproj" />
+    <Project Path="src/Modules/Module.Ordering.Api/Module.Ordering.Api.csproj" />
+    <Project Path="src/Modules/Module.Ordering/Module.Ordering.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Robotics/">
-    <Project Path="src/modules/Module.Robotics/Module.Robotics.Api/Module.Robotics.Api.csproj" />
-    <Project Path="src/modules/Module.Robotics/Module.Robotics/Module.Robotics.csproj" />
+    <Project Path="src/modules/Module.Robotics.Api/Module.Robotics.Api.csproj" />
+    <Project Path="src/modules/Module.Robotics/Module.Robotics.csproj" />
   </Folder>
   <Folder Name="/src/Shared/">
     <Project Path="src/Shared/BurgersAndBeyond.Shared/BurgersAndBeyond.Shared.csproj" Id="887a1702-eec8-4f14-bc9e-1cbb81c0a560" />

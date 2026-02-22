@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Application\CommandHandlers\**" />
+    <Compile Remove="Contracts\**" />
+    <EmbeddedResource Remove="Application\CommandHandlers\**" />
+    <EmbeddedResource Remove="Contracts\**" />
+    <None Remove="Application\CommandHandlers\**" />
+    <None Remove="Contracts\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.3" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.1.2" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Module.Ordering.Api\Module.Ordering.Api.csproj" />
+    <ProjectReference Include="..\Module.Robotics.Api\Module.Robotics.Api.csproj" />
+    <ProjectReference Include="..\Module.Kitchen.Api\Module.Kitchen.Api.csproj" />
+  </ItemGroup>
+</Project>
+

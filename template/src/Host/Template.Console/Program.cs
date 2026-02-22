@@ -16,7 +16,7 @@ builder.ConfigureServices((hostContext, services) =>
 
     services.AddModulith(configuration, options =>
     {
-        options.AddMyFirstModule();
+        options.AddMySecondModule();
         // You can register your modules here using the options object
         // Example: options.AddMembership();
     });

@@ -8,8 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.3" />
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.5" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.1.2" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
@@ -17,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Modules\Module.MyFirstModule\Module.MyFirstModule.Api\Module.MyFirstModule.Api.csproj" />
-    <ProjectReference Include="..\..\Modules\Module.MyFirstModule\Module.MyFirstModule\Module.MyFirstModule.csproj" />
+    <ProjectReference Include="..\..\modules\Module.MySecondModule.Api\Module.MySecondModule.Api.csproj" />
+    <ProjectReference Include="..\..\modules\Module.MySecondModule\Module.MySecondModule.csproj" />
   </ItemGroup>
 
 </Project>

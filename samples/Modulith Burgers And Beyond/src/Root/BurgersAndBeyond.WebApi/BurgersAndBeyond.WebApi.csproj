@@ -7,20 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.1.0" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.1.2" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\modules\Module.Feedback\Module.Feedback.Api\Module.Feedback.Api.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Feedback\Module.Feedback\Module.Feedback.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Kitchen\Module.Kitchen.Api\Module.Kitchen.Api.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Kitchen\Module.Kitchen\Module.Kitchen.csproj" />
-    <ProjectReference Include="..\..\Modules\Module.Ordering\Module.Ordering.Api\Module.Ordering.Api.csproj" />
-    <ProjectReference Include="..\..\Modules\Module.Ordering\Module.Ordering\Module.Ordering.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Robotics\Module.Robotics.Api\Module.Robotics.Api.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Robotics\Module.Robotics\Module.Robotics.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Feedback.Api\Module.Feedback.Api.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Feedback\Module.Feedback.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Kitchen.Api\Module.Kitchen.Api.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Kitchen\Module.Kitchen.csproj" />
+    <ProjectReference Include="..\..\Modules\Module.Ordering.Api\Module.Ordering.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Module.Ordering\Module.Ordering.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Robotics.Api\Module.Robotics.Api.csproj" />
+    <ProjectReference Include="..\..\modules\Module.Robotics\Module.Robotics.csproj" />
   </ItemGroup>
 
 </Project>

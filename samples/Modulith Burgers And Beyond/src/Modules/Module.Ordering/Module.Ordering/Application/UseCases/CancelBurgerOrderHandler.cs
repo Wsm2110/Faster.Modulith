@@ -1,6 +1,7 @@
 ﻿using Faster.Modulith.Contracts;
 using Module.Ordering.Api.UseCases;
 using Module.Ordering.Infrastructure;
+using Module.Kitchen.Api;
 
 namespace Module.Ordering.Application.UseCases;
 
@@ -8,10 +9,10 @@ namespace Module.Ordering.Application.UseCases;
 /// Handles the cancellation of a burger order within the ordering module.
 /// </summary>
 [Expose("api/v1/orders/cancel")]
-internal sealed class CancelBurgerOrderHandler(OrderingDbContext db) : IUseCaseHandler<CancelBurgerOrderUseCase, Result>
+internal sealed class CancelBurgerOrderHandler(IKitchenApi api, OrderingDbContext db) : IUseCaseHandler<CancelBurgerOrderUseCase, Result>
 {
     public async ValueTask<Result> Handle(CancelBurgerOrderUseCase request, CancellationToken ct)
-    {
+    {       
         // Retrieval of the aggregate root using the provided OrderId
         var order = await db.Orders.FindAsync([request.OrderId], ct);
 

@@ -9,8 +9,9 @@
 
   <ItemGroup>
     <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.3" />
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.6" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.1.0" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.3" />
   </ItemGroup>

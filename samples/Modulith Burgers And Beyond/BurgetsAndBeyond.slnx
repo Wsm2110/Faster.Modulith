@@ -27,7 +27,6 @@
     <Project Path="tests/Module.Feedback.Tests/Module.Feedback.Tests.csproj" />
     <Project Path="tests/Module.Kitchen.Tests/Module.Kitchen.Tests.csproj" />
     <Project Path="tests/Module.Ordering.Tests/Module.Ordering.Tests.csproj" />
-    <Project Path="tests/Module.Remember.Tests/Module.Remember.Tests.csproj" />
     <Project Path="tests/Module.Robotics.Tests/Module.Robotics.Tests.csproj" />
   </Folder>
 </Solution>

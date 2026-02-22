@@ -19,7 +19,7 @@
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.6" OutputItemType="Analyzer" ReferenceOutputAssembly="false">
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.1.0" OutputItemType="Analyzer" ReferenceOutputAssembly="false">
      </PackageReference>  
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
   </ItemGroup>

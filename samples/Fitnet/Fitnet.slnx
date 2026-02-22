@@ -34,6 +34,5 @@
     <Project Path="tests/Module.Offers.Tests/Module.Offers.Tests.csproj" />
     <Project Path="tests/Module.Passes.Tests/Module.Passes.Tests.csproj" />
     <Project Path="tests/Module.Reports.Tests/Module.Reports.Tests.csproj" />
-    <Project Path="tests/Module.Test.Tests/Module.Test.Tests.csproj" />
   </Folder>
 </Solution>

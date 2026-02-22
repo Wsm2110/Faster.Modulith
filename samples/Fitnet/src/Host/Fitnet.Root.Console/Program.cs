@@ -1,15 +1,30 @@
 ﻿using Faster.Modulith;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
-var services = new ServiceCollection();
+Console.WriteLine($"[{DateTime.UtcNow:O}] Initializing the Generic Host.");
 
-services.AddModulith(null, options =>
+IHostBuilder builder = Host.CreateDefaultBuilder(args);
+
+builder.ConfigureServices((hostContext, services) =>
 {
-    options.AddOffers();
-    options.AddMembership();
-    options.AddReports();
-    options.AddPasses();
+    IConfiguration configuration = hostContext.Configuration;
+
+    services.AddModulith(configuration, options =>
+    {
+        options.AddOffers();
+        options.AddMembership();
+        options.AddReports();
+        options.AddPasses();
+    });
+
 });
 
-// 2. Build the Service Provider
-var app = services.BuildServiceProvider();
+using IHost host = builder.Build();
+
+Console.WriteLine($"[{DateTime.UtcNow:O}] Host built. Starting application lifecycle.");
+
+await host.RunAsync();
+
+Console.WriteLine($"[{DateTime.UtcNow:O}] Application terminated gracefully.");
+

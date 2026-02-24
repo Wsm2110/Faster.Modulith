@@ -20,8 +20,10 @@
     - [Step 1: Define your Key (in .Api)](#step-1-define-your-key-in-api)
     - [Step 2: Implement the Logic (in .Module)](#step-2-implement-the-logic-in-module)
     - [Step 3: Wire it up (in Program.cs)](#step-3-wire-it-up-in-programcs)
-- [The Enforcer (Analyzers)](#the-enforcer-analyzers)
-- [The Magician (Generators & DX)](#the-magician-generators--dx)
+- [Auto-Generated Endpoints (The Expose Attribute)](#auto-generated-endpoints-the-expose-attribute)
+- [Roslyn Analyzers](#the-enforcer-analyzers)
+- [SourceGenerators](#the-magician-generators--dx)
+- [Auto-Generating Architecture Diagrams (Mermaid.js)](#auto-generating-architecture-diagrams-mermaidjs)
 - [Project Structure](#project-structure)
 - [The Escape Hatch: `[ArchitectureBypass]`](#the-escape-hatch-architecturebypass)
 - [Pipeline Behavior](#pipeline-behavior)
@@ -60,10 +62,10 @@ graph TD
         direction TB
         Key["Public Key (Contract)"]:::green
         Vault["Module (The Vault)"]:::red
-        Airlock["The Api (Generated)"]:::yellow
+        Facade["The Api (Generated)"]:::yellow
 
-        Key --> Airlock
-        Airlock -->|Secure Dispatch| Orchestrator
+        Key --> facade
+        Facade -->|Secure Dispatch| Orchestrator
         Orchestrator -->|Route| Vault
     end
 
@@ -81,7 +83,7 @@ Inside the Module (`.Module` project), everything is internal. Your Domain Entit
 The only way to interact with the Vault is through a specific "Key" defined in the `.Api` project. These are pure, simple DTOs (Records). They have no logic. They are just the request to open the door.
 
 ### 3. The EntryPoint(Api) is Generated (Entry)
-You never talk to the Vault directly. You enter through The Airlock (the Generated `I{ModuleName}`). The Airlock accepts your Key, sanitizes the transaction, and securely passes the message to the internal Dispatcher.
+You never talk to the Vault directly. You enter through The facade (the Generated `I{ModuleName}Api`). The facade accepts your Key, sanitizes the transaction, and securely passes the message to the internal Dispatcher.
 
 ---
 
@@ -104,7 +106,7 @@ It relies on the only thing that actually stops a developer: **The Red Squiggly 
 We do not believe in manual setup. We believe in scripts. Before you write a single line of code, understand the goal: moving from a tangled "Spaghetti Monolith" to a system of **Unbreakable Modules** where boundaries are enforced by the compiler.
 
 ### 1. The "Lazy" Way: CreateModule.cmd
-Do not create projects manually. Use our CLI helper to scaffold the **Vault** structure perfectly every time. This ensures your projects are born with the correct "DNA" and analyzer references [cite: 2026-01-28].
+Do not create projects manually. Use our CLI helper to scaffold the **Vault** structure perfectly every time. This ensures your projects are born with the correct "DNA" and analyzer references.
 
 ```powershell
 # Scaffolds Module.HumanResources, Module.HumanResources.Api, and Module.HumanResources.Tests
@@ -160,8 +162,7 @@ internal sealed class HireEmployeeHandler : IUseCaseHandler<HireEmployeeUseCase,
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A Result containing the Guid of the hired employee.</returns>
     public async Task<Result<Guid>> Handle(HireEmployeeUseCase usecase, CancellationToken cancellationToken)
-    {
-        // 2026-01-31 13:10:36 - Implementation logic initiated
+    {      
         return await Task.FromResult(Result<Guid>.Success(Guid.NewGuid()));
     }
 }
@@ -189,9 +190,9 @@ builder.Services.AddHumanResourcesModule();
 The Source Generator acts as the architect, automatically splitting your logic into the correct structural files. This ensures the public Facade remains the only entry point, while the Dispatcher handles internal traffic.
 
 What goes where?
-Module.g.cs (Public Entrypoint): Contains the HumanResourceModule : IHumanResourceModule. This is the "Front Door." It handles IUsecaseHandler mappings and IEventHandler publishing logic. [cite: 2026-01-10]
+Module.g.cs (Public Entrypoint): Contains the HumanResourceModule : IHumanResourceModule. This is the "Front Door." It handles IUsecaseHandler mappings and IEventHandler publishing logic.
 
-Dispatcher.g.cs (Internal Communication): An internal class that handles private cross-module routing. This is where ICommandHandler implementations are registered. It is inaccessible from outside the module and is generated even if the module is empty to ensure stable DI [cite: 2026-01-08].
+Dispatcher.g.cs (Internal Communication): An internal class that handles private cross-module routing. This is where ICommandHandler implementations are registered. It is inaccessible from outside the module and is generated even if the module is empty to ensure stable DI.
 
 Extensions.g.cs: Contains the IServiceCollection logic to register all handlers and generated types automatically. All code in this file is generated into the Faster.Modulith namespace.
 
@@ -223,28 +224,8 @@ In most Modular Monoliths, calling another module is a nightmare of "Search Hell
 
 **Faster.Modulith** solves this by generating **Friendly APIs** that provide instant discovery via IntelliSense.
 
-```mermaid
-sequenceDiagram
-    participant Controller as Web Controller
-    participant Airlock as IHumanResourcesApi (Airlock)
-    participant Orch as Orchestrator
-    participant Handler as Internal Handler
-
-    Controller->>Airlock: HireEmployee("John", 5000)
-    Note right of Controller: 1. Clean, typed API call
-    
-    Airlock->>Orch: Dispatch(new HireEmployeeUseCase(...))
-    Note right of Airlock: 2. Secure Transition
-    
-    Orch->>Handler: Handle(Message)
-    Note right of Orch: 3. Enters Vault
-    
-    Handler-->>Controller: Returns Result
-
-```
-
 ### 1. The Generated EntryPoint (The Public Facade) 
-Instead of interacting with the raw engine, the Source Generator creates a **Public API Wrapper** (`I{ModuleName}`) for every module. This acts as the Airlock for cross-module communication.
+Instead of interacting with the raw engine, the Source Generator creates a **Public API Wrapper** (`I{ModuleName}Api`) for every module. This acts as the facade for cross-module communication.
 
 **Why this enriches your DX:**
 * **No "Search Hell":** You do not need to hunt for specific message classes.
@@ -369,4 +350,196 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
     }
 }
 ```
+# Auto-Generated Endpoints (The `Expose` Attribute)
+
+Writing boilerplate controllers or manually mapping Minimal APIs for every use case introduces friction and increases the risk of architectural drift.
+
+To eliminate this overhead, **Faster.Modulith** provides the `Expose` attribute.
+
+Instead of writing a dedicated web layer, you apply this attribute directly to your **Handler** inside the internal `.Module` project. The Source Generator reads this attribute and automatically scaffolds the ASP.NET Core Minimal API endpoints in the `.Api` project for you.
+
+This guarantees that your HTTP layer perfectly mirrors your internal capabilities — **without exposing the handlers themselves**.
+
+---
+
+## How It Works
+
+Decorate your internal handler with the `Expose` attribute and define the desired HTTP route.
+
+The generator will:
+
+1. Inspect the handler  
+2. Discover its associated `UseCase`  
+3. Generate the appropriate public endpoint  
+
+---
+
+## Example: Internal Handler
+
+```csharp
+using Faster.Modulith.Contracts;
+using Microsoft.EntityFrameworkCore;
+using Module.Ordering.Api.UseCases;
+using Module.Ordering.Infrastructure;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Module.Ordering.Application.UseCases;
+
+/// <summary>
+/// Handles requests to update the status of an order.
+/// </summary>
+/// <remarks>
+/// If the specified order does not exist, the handler returns a failure result.
+/// An InvalidOperationException may be thrown if the status update operation fails.
+/// </remarks>
+/// <param name="db">The database context used to access and modify order data.</param>
+[Expose("api/v1/orders/update")]
+internal sealed class UpdateStatusHandler(OrderingDbContext db)
+    : IUseCaseHandler<UpdateOrderStatusUseCase, Result>
+{
+    /// <summary>
+    /// Handles the update of an order's status based on the provided request.
+/// </summary>
+    public async ValueTask<Result> Handle(UpdateOrderStatusUseCase request, CancellationToken ct)
+    {
+        var order = await db.Orders.FirstOrDefaultAsync(x => x.Id == request.OrderId, ct);
+        if (order is null)
+            return Result.Failure("Order not found.");
+
+        try
+        {
+            order.UpdateStatus(request.NewStatus);
+            await db.SaveChangesAsync(ct);
+            return Result.Success;
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Result.Failure(ex.Message);
+        }
+    }
+}
+```
+
+---
+
+## The Generated Output
+
+The Source Generator automatically emits a static endpoint class into the `Faster.Modulith` namespace. It maps the routes defined on internal handlers directly to the public module interface.
+
+When a request hits the endpoint, the generated code:
+
+- Dispatches the use case  
+- Unwraps the `Result` pattern  
+- Returns the appropriate HTTP status code  
+
+```csharp
+// <auto-generated/>
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using System.Threading;
+using Faster.Modulith.Contracts;
+using Module.Ordering.Api;
+
+namespace Faster.Modulith;
+
+/// <summary>
+/// Endpoint mapping definitions for the Ordering module.
+/// </summary>
+/// <remarks>
+/// This class is auto-generated and wires exposed use cases
+/// into ASP.NET Core minimal API endpoints.
+/// </remarks>
+[global::System.Diagnostics.DebuggerStepThrough]
+public static partial class OrderingEndpoints
+{
+    /// <summary>
+    /// Maps all exposed endpoints for the Ordering module.
+/// </summary>
+    public static IEndpointRouteBuilder MapOrderingEndpoints(this IEndpointRouteBuilder app)
+    {
+        app.MapPost("/api/v1/orders/update",
+            async (global::Module.Ordering.Api.UseCases.UpdateOrderStatusUseCase request,
+                   IOrderingApi module,
+                   CancellationToken ct) =>
+        {
+            var result = await module.UpdateOrderStatus(request, ct);
+            return result.IsSuccess
+                ? Results.Ok(result)
+                : Results.NotFound(result.Error);
+        })
+        .WithTags("Ordering");
+
+        app.MapPost("/api/v1/orders/finalize",
+            async (global::Module.Ordering.Api.UseCases.FinalizeTableOrderUseCase request,
+                   IOrderingApi module,
+                   CancellationToken ct) =>
+        {
+            var result = await module.FinalizeTableOrder(request, ct);
+            return result.IsSuccess
+                ? Results.Ok(result)
+                : Results.NotFound(result.Error);
+        })
+        .WithTags("Ordering");
+
+        return app;
+    }
+}
+```
+
+---
+
+## Wiring It Up
+
+To activate the generated endpoints, call the generated mapping method in your `Program.cs` file immediately after registering the module’s core services.
+
+```csharp
+using Faster.Modulith;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Registers the internal dispatcher and API interfaces
+builder.Services.AddOrderingModule();
+
+var app = builder.Build();
+
+// Automatically maps all endpoints decorated with [Expose]
+app.MapOrderingEndpoints();
+
+app.Run();
+```
+
+---
+
+## Result
+
+With a single attribute on your internal handler:
+
+- ✅ No controllers  
+- ✅ No manual endpoint mapping  
+- ✅ No duplicated route definitions  
+- ✅ No architectural leakage  
+
+Your **Application layer remains pure**, and your **HTTP layer stays perfectly synchronized** with your internal use cases — automatically.
+
+## Auto-Generating Architecture Diagrams (Mermaid.js)
+
+Architecture diagrams are notorious for becoming obsolete the moment the next sprint begins. Manual diagrams rely on developer discipline, which often breaks down under tight deadlines. 
+
+With **Faster.Modulith**, your code is your architecture. Because the Roslyn Source Generator builds a complete semantic model of your modules, exposed contracts, event subscriptions, and internal handlers, it automatically generates a live, mathematically accurate **C4 Model** using Mermaid.js.
+
+### The "Always Accurate" Diagram
+
+You do not need to maintain separate Visio or draw.io files. The source generator continuously maps your system's landscape and emits a static class containing the Mermaid markup. This markup reflects the exact state of your compiled code, mapping the interactions between your Host Application, Orchestrator, and individual Module Vaults.
+
+![generated-architecture-diagram](assets/mermaidgenerator.png)
+
+### Exposing the Architecture
+
+You can easily serve this generated diagram via a Minimal API endpoint, making it instantly available for your developer portal, continuous integration pipeline, or internal wiki.
+
 **Ensuring the final feature is implemented as seamlessly as the first.**

@@ -13,7 +13,7 @@ namespace Faster.Modulith.Analyzers.Generators
     /// <remarks>
     /// This source generator creates two separate files:
     /// - Module Options class for configuration binding.
-    /// - Module registration extension method (wiring handlers, pipelines, and the internal dispatcher).
+    /// - Module registration extension method (wiring handlers, pipelines, the internal dispatcher, and the public API facade).
     /// </remarks>
     internal static class RegistrationGenerator
     {
@@ -53,7 +53,7 @@ namespace Faster.Modulith.Analyzers.Generators
             sb.AppendLine("}");
 
             context.AddSource(
-                $"{ctx.ModuleName}Options.g.cs",
+                $"Infrastructure/{ctx.ModuleName}Options.g.cs",
                 SourceText.From(sb.ToString(), Encoding.UTF8));
         }
 
@@ -70,6 +70,7 @@ namespace Faster.Modulith.Analyzers.Generators
             sb.AppendLine("using Microsoft.Extensions.DependencyInjection;");
             sb.AppendLine("using Faster.Modulith.Contracts;");
             sb.AppendLine($"using Module.{ctx.ModuleName};");
+            sb.AppendLine($"using Module.{ctx.ModuleName}.Api;");
             sb.AppendLine();
             sb.AppendLine($"namespace Module.{ctx.ModuleName}.Infrastructure;");
             sb.AppendLine();
@@ -94,6 +95,9 @@ namespace Faster.Modulith.Analyzers.Generators
             sb.AppendLine("            services.Configure(configure);");
             sb.AppendLine("        }");
             sb.AppendLine();
+            sb.AppendLine("        // Register the public API facade");
+            sb.AppendLine($"        services.AddScoped<I{ctx.ModuleName}Api, {ctx.ModuleName}Api>();");
+            sb.AppendLine();
             sb.AppendLine("        // Register the internal module dispatcher");
             sb.AppendLine($"        services.AddScoped<I{ctx.ModuleName}Dispatcher, {ctx.ModuleName}Dispatcher>();");
             sb.AppendLine();
@@ -103,20 +107,20 @@ namespace Faster.Modulith.Analyzers.Generators
             // ---------------------------------------------
             foreach (var h in handlers)
             {
-                string type = h.Type switch
+                string interfaceType = h.Type switch
                 {
                     ArtifactType.Command => $"global::Faster.Modulith.Contracts.ICommandHandler<{h.ServiceInterfaceType}, {(h.ResponseType == "void" ? "int" : h.ResponseType)}>",
                     ArtifactType.UseCase => $"global::Faster.Modulith.Contracts.IUseCaseHandler<{h.ServiceInterfaceType}, {h.ResponseType}>",
                     _ => $"global::Faster.Modulith.Contracts.IEventHandler<{h.ServiceInterfaceType}>"
                 };
 
-                sb.AppendLine($"        services.AddScoped<{type}, {h.ImplementationType}>();");
+                sb.AppendLine($"        services.AddScoped<{interfaceType}, {h.ImplementationType}>();");
             }
 
             // ---------------------------------------------
-            // Register pipeline behaviors (if any)
+            // Register pipeline behaviors
             // ---------------------------------------------
-            var behaviors = handlers.Where(h => h.PipelineBehaviors.Any()).ToList();
+            var behaviors = handlers.Where(h => h.PipelineBehaviors != null && h.PipelineBehaviors.Any()).ToList();
             if (behaviors.Any())
             {
                 sb.AppendLine();
@@ -134,7 +138,6 @@ namespace Faster.Modulith.Analyzers.Generators
                 }
             }
 
-            // Call optional partial infrastructure hook
             sb.AppendLine();
             sb.AppendLine("        AddInfrastructure(services);");
             sb.AppendLine();
@@ -149,7 +152,7 @@ namespace Faster.Modulith.Analyzers.Generators
             sb.AppendLine("}");
 
             context.AddSource(
-                $"{ctx.ModuleName}Extensions.g.cs",
+                $"Infrastructure/{ctx.ModuleName}Extensions.g.cs",
                 SourceText.From(sb.ToString(), Encoding.UTF8));
         }
     }

@@ -5,6 +5,7 @@ using Module.Robotics.Api.UseCases;
 using Module.Robotics.Contracts;
 using Module.Robotics.Domain;
 using Module.Robotics.Infrastructure;
+using Module.Kitchen.Api;
 
 namespace Module.Robotics.Application.UseCases;
 
@@ -15,6 +16,7 @@ namespace Module.Robotics.Application.UseCases;
 [Expose("api/v1/robotics/deliverfood")]
 internal class DeliverFoodUseCaseHandler(
     RoboticsDbContext db,
+    IKitchenApi kitchenApi,
     IRoboticsDispatcher dispatcher,
     IRobotHardware robot) : IUseCaseHandler<DeliverFoodUseCase, Result>
 {

@@ -1,9 +1,5 @@
 ![Faster.Modulith Architecture - Chaos vs Vaults](assets/chaos.jpg)
 
-<video src="./assets/Video_Enhancement_and_Delivery.mp4" autoplay loop muted playsinline width="100%">
-  Your browser does not support the video tag.
-</video>
-
 # Faster.Modulith
 ### *Building Unbreakable Monoliths with Roslyn*
 

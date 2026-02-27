@@ -5,7 +5,7 @@
 
 ![Nuget](https://img.shields.io/badge/NuGet-v1.0.0-blue) ![License](https://img.shields.io/badge/license-MIT-green) ![Architecture](https://img.shields.io/badge/Architecture-Enforced-red) ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
 
-**Ensuring the final feature is implemented as seamlessly as the first.**
+**Ensuring that the last feature you build is just as easy to ship as the first.**
 
 ---
 ## 📖 Table of Contents
@@ -41,71 +41,16 @@ In .NET projects, architectural mistakes rarely show up as broken code or compil
 
 It’s not about choosing Clean Architecture over Vertical Slices. It’s about taking those architectural decisions that feel safe early on, and **locking them in a vault guarded by the compiler**
 eliminating the possibility of **architectural drift**. 
-
-We stop the "Big Ball of Mud" by making the path of least resistance—tight coupling—physically impossible, **ensuring that the last feature you build is just as easy to ship as the first.**
-
----
-
-## The "Vault" Architecture
-
-Faster.Modulith is not just a library; it implements a **strict version of the Modular Monolith** that we call **"Vault."**
-
-Most modular monoliths are "soft." They rely on namespaces and discipline to keep modules separate. But discipline fails when deadlines loom. **Vault Architecture** is hard. It treats every Module as a secure, impenetrable vault.
-
-```mermaid
-graph TD
-    subgraph "Host Application"
-        Orchestrator[Global Orchestrator]
-    end
-
-    subgraph "Module: HumanResources"
-        direction TB
-        Key["Public Key (Contract)"]:::green
-        Vault["Module (The Vault)"]:::red
-        Facade["The Api (Generated)"]:::yellow
-
-        Key --> facade
-        Facade -->|Secure Dispatch| Orchestrator
-        Orchestrator -->|Route| Vault
-    end
-
-    classDef green fill:#d5f5e3,stroke:#2ecc71,color:black;
-    classDef red fill:#fadbd8,stroke:#e74c3c,color:black;
-    classDef yellow fill:#fcf3cf,stroke:#f1c40f,color:black;
-```
-
-# The 3 Laws of Vault
-
-### 1. The Vault is Private (Internal)
-Inside the Module (`.Module` project), everything is internal. Your Domain Entities, your EF Core Context, your Services, and your Logic. Nothing escapes the vault. The compiler physically prevents other modules from seeing your internal implementation details.
-
-### 2. The Key is Public (Contract)
-The only way to interact with the Vault is through a specific "Key" defined in the `.Api` project. These are pure, simple DTOs (Records). They have no logic. They are just the request to open the door.
-
-### 3. The EntryPoint(Api) is Generated (Entry)
-You never talk to the Vault directly. You enter through The facade (the Generated `I{ModuleName}Api`). The facade accepts your Key, sanitizes the transaction, and securely passes the message to the internal Dispatcher.
-
----
-
-## How It Works
-
-It does not rely on polite agreements or wiki pages that no one reads. It does not rely on you reading another blog post from Uncle Bob, or watching a 4-hour YouTube tutorial to figure out where to put a file.
-
-It relies on the only thing that actually stops a developer: **The Red Squiggly Line.**
-
-| Action | Result |
-| :--- | :--- |
-| Injecting a Repository into a Controller | **Build Failed** |
-| Referencing internal Domain logic from another module | **Build Failed** |
-| Calling a UseCase | **Success (Code is generated)** |
-
 ---
 
 ## Getting Started (In 60 Seconds)
 
 We do not believe in manual setup. We believe in scripts. Before you write a single line of code, understand the goal: moving from a tangled "Spaghetti Monolith" to a system of **Unbreakable Modules** where boundaries are enforced by the compiler.
 
-### 1. The "Lazy" Way: CreateModule.cmd
+### 2. Apply the Default Modulith Template
+Before adding individual modules, establish your baseline configuration by copying the templates provided by this repository. This centralizes the setup for common modules like Kitchen, Ordering, Robotics, and Feedback.
+
+### 2. The "Lazy" Way: CreateModule.cmd
 Do not create projects manually. Use our CLI helper to scaffold the **Vault** structure perfectly every time. This ensures your projects are born with the correct "DNA" and analyzer references.
 
 ```powershell
@@ -120,8 +65,7 @@ If you choose not to use the batch file, you must manually add the following ref
 
 ```xml
 <ItemGroup>
-    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.0.0" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <PackageReference Include="Faster.Modulith.Contracts" Version="1.0.0" />
+    <PackageReference Include="Faster.Modulith.Analyzers" Version="1.1.3" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 </ItemGroup>
 ```
 
@@ -200,7 +144,7 @@ Extensions.g.cs: Contains the IServiceCollection logic to register all handlers 
 
 ---
 
-## The "Enforcer" (Analyzers)
+## The (Analyzers)
 
 We include a suite of Roslyn Analyzers that act as your strict architectural bodyguard. They catch "invisible mistakes" during development before the code is even committed.
 
@@ -218,7 +162,7 @@ The image captures the **MOD005** analyzer in action, blocking an attempt to use
 
 ![IDE screenshot demonstrating the MOD005 analyzer error enforcing strict isolation](assets/ruleset.png)
 
-## The "Magician" (Generators & DX)
+## Sourcegenerators
 
 In most Modular Monoliths, calling another module is a nightmare of "Search Hell." You have to search through 50 folders to find the exact class name of the message. Is it `CreateUserCommand`? `AddUser`? `UserRegistrationRequest`?
 
@@ -502,8 +446,21 @@ using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Registers the internal dispatcher and API interfaces
-builder.Services.AddOrderingModule();
+builder.Services.AddModulith(builder.Configuration, options =>
+{
+    options.AddKitchen(kitchenOptions =>
+    {
+        kitchenOptions.UseInMemory = true;
+    });
+
+    options.AddOrdering(orderingOptions =>
+    {
+        orderingOptions.UseInMemory = true; 
+    });
+
+    options.AddRobotics();
+    options.AddFeedback();
+});
 
 var app = builder.Build();
 

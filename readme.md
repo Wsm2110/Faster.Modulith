@@ -27,6 +27,7 @@
 - [Project Structure](#project-structure)
 - [The Escape Hatch: `[ArchitectureBypass]`](#the-escape-hatch-architecturebypass)
 - [Pipeline Behavior](#pipeline-behavior)
+  
 ---
 
 ## The Tragedy of Good Intentions
@@ -41,6 +42,7 @@ In .NET projects, architectural mistakes rarely show up as broken code or compil
 
 It’s not about choosing Clean Architecture over Vertical Slices. It’s about taking those architectural decisions that feel safe early on, and **locking them in a vault guarded by the compiler**
 eliminating the possibility of **architectural drift**. 
+
 ---
 
 ## Getting Started (In 60 Seconds)

@@ -1,7 +1,6 @@
 ![Faster.Modulith Architecture - Chaos vs Vaults](assets/chaos.jpg)
 
 # Faster.Modulith
-### *Building Unbreakable Monoliths with Roslyn*
 
 ![Nuget](https://img.shields.io/badge/NuGet-v1.0.0-blue) ![License](https://img.shields.io/badge/license-MIT-green) ![Architecture](https://img.shields.io/badge/Architecture-Enforced-red) ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
 
@@ -22,26 +21,27 @@
   
 ---
 
+# Faster.Modulith: Building Unbreakable Moduliths
+
+Traditional monoliths naturally degrade over time. Under the pressure of deadlines, developers inevitably bypass architectural layers, creating tightly coupled "Big Ball of Mud" systems that are terrifying to modify and scale. While microservices offer a solution through strict physical boundaries, they introduce a massive distributed system tax—unpredictable network latency, complex deployment meshes, and distributed transaction management.
+
+**Faster.Modulith** is an architectural framework designed for .NET that provides the strict logical boundaries of microservices alongside the deployment simplicity and performance of a single-process monolith. In a standard .NET solution, architectural boundaries are merely suggestions. They are often just folders or separate projects that can be easily bypassed by a developer simply adding a project reference. Over time, this guarantees architectural drift. 
+
+`Faster.Modulith` solves this by enforcing Bounded Contexts at the compiler level. By deeply integrating Roslyn Source Generators and custom Analyzers, the framework acts as an uncompromising architectural bodyguard. 
+
+`Faster.Modulith` removes human discipline from the equation. It translates your architectural boundaries into physical rules that directly integrate with the .NET compiler. If a developer attempts to bypass a module's public API and inject an internal service from a neighboring module, the analyzer immediately breaks the build with a hard compiler error. 
+
+You do not just get a warning; the code simply will not compile. By turning architectural violations into syntax errors, `Faster.Modulith` guarantees that your system physically cannot degrade into a tightly coupled mess.
+
 # What is a Modular Monolith (Modulith)?
 
 For years, the software industry pushed microservices as the default solution for scaling applications. However, many teams quickly discovered that extracting a traditional monolith into microservices often traded code complexity for operational complexity. You exchanged in-process method calls for unpredictable network latency, distributed transactions, and complex deployment meshes.
 
 A Modular Monolith (or Modulith) is an architectural pattern that provides the best of both worlds: the strict logical boundaries and domain isolation of microservices, combined with the deployment simplicity and performance of a traditional monolith.
 
-## What Problem Does It Solve?
-
 Traditional monoliths naturally degrade into a "Big Ball of Mud." Because all code lives in the same memory space without physical barriers, developers inevitably bypass architectural layers to meet deadlines. A UI controller might directly query the database, or the Billing module might directly instantiate classes from the Shipping module. Over time, this creates a tightly coupled system that is terrifying to modify.
 
-The Modular Monolith solves this by enforcing Bounded Contexts at the compiler level.
-
-## Key Benefits of the Modulith Approach
-
-* **Zero Distributed System Tax:** Modules communicate in-memory. There is no network latency, no need for distributed tracing tools to debug a simple request, and transactions can be handled using standard database capabilities rather than complex saga patterns.
-* **Compiler-Enforced Boundaries:** Unlike a traditional monolith where boundaries are merely suggestions (often just folders in a project), a true Modulith physically separates the public contracts (`.Api`) from the internal implementation (`.Module`).
-* **Deployment Simplicity:** You build, test, and deploy a single executable. Your CI/CD pipeline remains fast and straightforward.
-* **Future-Proofing:** If a specific module eventually requires independent scaling or a different technology stack, extracting it into a microservice is trivial. Because the module was strictly isolated from day one, you simply move the folder to a new repository and put a web controller in front of its public API.
-
-`Faster.Modulith` takes this concept to its logical conclusion for .NET development. By leveraging Roslyn Source Generators and custom Analyzers, we ensure that your modular boundaries are mathematically enforced by the compiler, completely preventing architectural drift.. 
+The Modular Monolith solves this by organizing the codebase into strict, logically encapsulated Bounded Contexts within a single process. It requires modules to interact strictly through well-defined public interfaces or in-memory events, rather than direct database queries or internal class instantiation. This provides the high cohesion and low coupling of microservices, but retains the simple deployment and fast, in-process method calls of a traditional monolith.
 
 ---
 

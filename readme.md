@@ -8,40 +8,40 @@
 **Ensuring that the last feature you build is just as easy to ship as the first.**
 
 ---
-## 📖 Table of Contents
-- [The Tragedy of Good Intentions](#the-tragedy-of-good-intentions)
-- [The "Vault" Architecture](#the-vault-architecture)
-- [The 3 Laws of Vault](#the-3-laws-of-vault)
-- [How It Works](#how-it-works)
+## Table of Contents
+- [What is a Modular Monolith (Modulith)?](#what-is-a-modular-monolith-modulith)
 - [Getting Started (In 60 Seconds)](#getting-started-in-60-seconds)
-    - [1. The "Lazy" Way: CreateModule.cmd](#1-the-lazy-way-createmodulecmd)
-    - [2. The Manual Way: Required Packages](#2-the-manual-way-required-packages)
 - [Implementation Steps](#implementation-steps)
-    - [Step 1: Define your Key (in .Api)](#step-1-define-your-key-in-api)
-    - [Step 2: Implement the Logic (in .Module)](#step-2-implement-the-logic-in-module)
-    - [Step 3: Wire it up (in Program.cs)](#step-3-wire-it-up-in-programcs)
-- [Auto-Generated Endpoints (The Expose Attribute)](#auto-generated-endpoints-the-expose-attribute)
-- [Roslyn Analyzers](#the-enforcer-analyzers)
-- [SourceGenerators](#the-magician-generators--dx)
-- [Auto-Generating Architecture Diagrams (Mermaid.js)](#auto-generating-architecture-diagrams-mermaidjs)
+- [Roslyn Analyzers (The Enforcer)](#roslyn-analyzers-the-enforcer)
+- [Source Generators](#source-generators)
 - [Project Structure](#project-structure)
 - [The Escape Hatch: `[ArchitectureBypass]`](#the-escape-hatch-architecturebypass)
 - [Pipeline Behavior](#pipeline-behavior)
+- [Auto-Generated Endpoints (The `Expose` Attribute)](#auto-generated-endpoints-the-expose-attribute)
+- [Auto-Generating Architecture Diagrams (Mermaid.js)](#auto-generating-architecture-diagrams-mermaidjs)
   
 ---
 
-## The Tragedy of Good Intentions
+# What is a Modular Monolith (Modulith)?
 
-At some point, every team realizes they aren't fighting bugs or performance issues anymore. **They are fighting the architecture.**
+For years, the software industry pushed microservices as the default solution for scaling applications. However, many teams quickly discovered that extracting a traditional monolith into microservices often traded code complexity for operational complexity. You exchanged in-process method calls for unpredictable network latency, distributed transactions, and complex deployment meshes.
 
-What makes this especially painful is that the architecture usually looked *perfect* at the beginning. It followed best practices. It used the right patterns. The diagram had colorful boxes with neat arrows. It passed code reviews. Nothing was obviously wrong—until months of lost time made the cost impossible to ignore.
+A Modular Monolith (or Modulith) is an architectural pattern that provides the best of both worlds: the strict logical boundaries and domain isolation of microservices, combined with the deployment simplicity and performance of a traditional monolith.
 
-In .NET projects, architectural mistakes rarely show up as broken code or compile errors. They show up as **hesitation**. They show up as 4 PM Friday meetings about "circular dependencies." They show up as fear of change. They turn capable teams into cautious ones and productive systems into fragile artifacts.
+## What Problem Does It Solve?
 
-**Faster.Modulith** exists because we got tired of fighting.
+Traditional monoliths naturally degrade into a "Big Ball of Mud." Because all code lives in the same memory space without physical barriers, developers inevitably bypass architectural layers to meet deadlines. A UI controller might directly query the database, or the Billing module might directly instantiate classes from the Shipping module. Over time, this creates a tightly coupled system that is terrifying to modify.
 
-It’s not about choosing Clean Architecture over Vertical Slices. It’s about taking those architectural decisions that feel safe early on, and **locking them in a vault guarded by the compiler**
-eliminating the possibility of **architectural drift**. 
+The Modular Monolith solves this by enforcing Bounded Contexts at the compiler level.
+
+## Key Benefits of the Modulith Approach
+
+* **Zero Distributed System Tax:** Modules communicate in-memory. There is no network latency, no need for distributed tracing tools to debug a simple request, and transactions can be handled using standard database capabilities rather than complex saga patterns.
+* **Compiler-Enforced Boundaries:** Unlike a traditional monolith where boundaries are merely suggestions (often just folders in a project), a true Modulith physically separates the public contracts (`.Api`) from the internal implementation (`.Module`).
+* **Deployment Simplicity:** You build, test, and deploy a single executable. Your CI/CD pipeline remains fast and straightforward.
+* **Future-Proofing:** If a specific module eventually requires independent scaling or a different technology stack, extracting it into a microservice is trivial. Because the module was strictly isolated from day one, you simply move the folder to a new repository and put a web controller in front of its public API.
+
+`Faster.Modulith` takes this concept to its logical conclusion for .NET development. By leveraging Roslyn Source Generators and custom Analyzers, we ensure that your modular boundaries are mathematically enforced by the compiler, completely preventing architectural drift.. 
 
 ---
 
@@ -114,7 +114,18 @@ internal sealed class HireEmployeeHandler : IUseCaseHandler<HireEmployeeUseCase,
 }
 ```
 
-## Step 3: Wire it up (in Program.cs)
+## Step 3: Automated Code Generation
+
+Source generators will automatically generate the `HumanResourcesApi` interface within the `.Api` project and the `HumanResourcesDispatcher` within the `.Module` project. All generated code will naturally reside within the `Faster.Modulith` namespace. 
+
+The dispatcher is responsible for routing internal commands and remains strictly inaccessible from outside the module. This architectural guardrail ensures that all cross-module communication is explicitly routed through the public API.
+
+### Handler Registration Strategy
+
+* **Use Case Handlers:** Registered within the `HumanResourcesApi`.
+* **Command and Event Handlers:** Registered within the `HumanResourcesDispatcher`. (Note: The dispatcher class is generated even if a module currently has no registered use cases or events).
+
+## Step 4: Wire it up (in Program.cs)
 
 Registration is simplified to one line per module. These extension methods are generated automatically to ensure all internal services and dispatchers are correctly registered—even if no usecases currently exist.
 
@@ -125,26 +136,14 @@ Registration is simplified to one line per module. These extension methods are g
 ### Project: Main Host
 
 ```csharp
-// 2026-01-31 13:11:30 - Registering module services
+
 using Faster.Modulith;
 
-// The generated extension method resides in the Faster.Modulith namespace
-builder.Services.AddHumanResourcesModule();
-
-```
-
-The Source Generator acts as the architect, automatically splitting your logic into the correct structural files. This ensures the public Facade remains the only entry point, while the Dispatcher handles internal traffic.
-
-What goes where?
-Module.g.cs (Public Entrypoint): Contains the HumanResourceModule : IHumanResourceModule. This is the "Front Door." It handles IUsecaseHandler mappings and IEventHandler publishing logic.
-
-Dispatcher.g.cs (Internal Communication): An internal class that handles private cross-module routing. This is where ICommandHandler implementations are registered. It is inaccessible from outside the module and is generated even if the module is empty to ensure stable DI.
-
-Extensions.g.cs: Contains the IServiceCollection logic to register all handlers and generated types automatically. All code in this file is generated into the Faster.Modulith namespace.
-
-![Show_Generated_Files](assets/Generated.png)
-
----
+builder.Services.AddModulith(builder.Configuration, options =>
+{
+    // The generated extension method resides in the Faster.Modulith namespace
+    options.AddHumanResourcesModule();
+});
 
 ## The (Analyzers)
 

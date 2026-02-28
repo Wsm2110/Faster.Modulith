@@ -145,6 +145,8 @@ builder.Services.AddModulith(builder.Configuration, options =>
     options.AddHumanResourcesModule();
 });
 
+```
+
 ## The (Analyzers)
 
 We include a suite of Roslyn Analyzers that act as your strict architectural bodyguard. They catch "invisible mistakes" during development before the code is even committed.

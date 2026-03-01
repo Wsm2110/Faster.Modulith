@@ -2,10 +2,6 @@
   <Folder Name="/src/" />
   <Folder Name="/src/BuildingBlocks/" />
   <Folder Name="/src/Modules/" />
-  <Folder Name="/src/Modules/Management/">
-    <Project Path="src/Modules/Module.Management.Api/Module.Management.Api.csproj" />
-    <Project Path="src/Modules/Module.Management/Module.Management.csproj" />
-  </Folder>
   <Folder Name="/src/Modules/Membership/">
     <Project Path="src/modules/Module.Membership.Api/Module.Membership.Api.csproj" />
     <Project Path="src/modules/Module.Membership/Module.Membership.csproj" />
@@ -13,10 +9,6 @@
   <Folder Name="/src/Modules/Offers/">
     <Project Path="src/modules/Module.Offers.Api/Module.Offers.Api.csproj" />
     <Project Path="src/modules/Module.Offers/Module.Offers.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/Passes/">
-    <Project Path="src/modules/Module.Passes.Api/Module.Passes.Api.csproj" />
-    <Project Path="src/modules/Module.Passes/Module.Passes.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Reports/">
     <Project Path="src/modules/Module.Reports.Api/Module.Reports.Api.csproj" />
@@ -29,10 +21,8 @@
     <Project Path="src/Shared/Template.Shared/Fitnet.Shared.csproj" Id="bd1fd1b8-ea2a-4d9c-91cd-7b630c849871" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/Module.Management.Tests/Module.Management.Tests.csproj" />
     <Project Path="tests/Module.Membership.Tests/Module.Membership.Tests.csproj" />
     <Project Path="tests/Module.Offers.Tests/Module.Offers.Tests.csproj" />
-    <Project Path="tests/Module.Passes.Tests/Module.Passes.Tests.csproj" />
     <Project Path="tests/Module.Reports.Tests/Module.Reports.Tests.csproj" />
   </Folder>
 </Solution>

@@ -16,7 +16,7 @@ namespace Module.Membership.Application.UseCases
     /// <summary>
     /// Handles the preparation and initialization of a new membership contract.
     /// </summary>
-    internal class PrepareMembershipHandler(IMembershipRepository Repository, IMembershipDispatcher dispatcher) : IUseCaseHandler<PrepareMembershipUseCase, Result<Guid>>
+    internal class PrepareMembershipHandler(IMembershipRepository Repository, IMembershipDispatcher dispatcher) : IUseCaseHandler<PrepareMembershipUseCase, Result>
     {
         /// <summary>
         /// Asynchronously processes the membership preparation, applies any eligible discounts, and validates the provided credit card.
@@ -24,27 +24,30 @@ namespace Module.Membership.Application.UseCases
         /// <param name="useCase">The data transfer object containing the customer and plan details.</param>
         /// <param name="ct">The cancellation token to observe while waiting for the task to complete.</param>
         /// <returns>A value task representing the asynchronous operation, yielding a result with the generated contract identifier if successful, or an error otherwise.</returns>
-        public async ValueTask<Result<Guid>> Handle(PrepareMembershipUseCase useCase, CancellationToken ct)
+        public async ValueTask<Result> Handle(PrepareMembershipUseCase useCase, CancellationToken ct)
         {
             Console.WriteLine($"[{DateTime.UtcNow:O}] Handling PrepareContractCommand for Customer: {useCase.CustomerId}");
 
-            var contract = new Contract(useCase.CustomerId, useCase.PlanType);
+            var contract = new Contract(useCase.CustomerId, useCase.Tier);
 
             var discountResult = await dispatcher.MembershipDiscount(new MembershipDiscountCommand(contract));
             if (!discountResult.IsSuccess)
             {
-                return Result<Guid>.Failure(discountResult.Error);
+                return Result.Failure(discountResult.Error);
             }
 
             var creditcardResult = await dispatcher.ValidateCreditCard(contract.CustomerId, contract.CreditCardNumber, contract.ValidUntil);
             if (!creditcardResult.IsSuccess)
             {
-                return Result<Guid>.Failure(creditcardResult.Error);
+                return Result.Failure(creditcardResult.Error);
             }
 
             await Repository.SaveAsync(contract);
 
-            return Result<Guid>.Success(Guid.NewGuid());
+            // use dispatcher to notify other modules - we just signed a new member
+            await dispatcher.PublishMembershipSignedAsync(contract.Id, contract.CustomerId);
+
+            return Result.Success;
         }
     }
 

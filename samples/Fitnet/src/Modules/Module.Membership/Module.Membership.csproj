@@ -13,9 +13,6 @@
     <PackageReference Include="Faster.Modulith.Analyzers" Version="1.1.3" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Application\EventHandlers\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Module.Membership.Api\Module.Membership.Api.csproj" />
   </ItemGroup>
 </Project>

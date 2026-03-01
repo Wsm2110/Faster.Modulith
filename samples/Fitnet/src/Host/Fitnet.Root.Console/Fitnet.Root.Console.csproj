@@ -20,8 +20,6 @@
     <ProjectReference Include="..\..\modules\Module.Membership\Module.Membership.csproj" />
     <ProjectReference Include="..\..\modules\Module.Offers.Api\Module.Offers.Api.csproj" />
     <ProjectReference Include="..\..\modules\Module.Offers\Module.Offers.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Passes.Api\Module.Passes.Api.csproj" />
-    <ProjectReference Include="..\..\modules\Module.Passes\Module.Passes.csproj" />
     <ProjectReference Include="..\..\modules\Module.Reports.Api\Module.Reports.Api.csproj" />
     <ProjectReference Include="..\..\modules\Module.Reports\Module.Reports.csproj" />
   </ItemGroup>

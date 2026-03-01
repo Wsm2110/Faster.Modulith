@@ -16,8 +16,7 @@ builder.ConfigureServices((hostContext, services) =>
     {
         options.AddOffers();
         options.AddMembership();
-        options.AddReports();
-        options.AddPasses();
+        options.AddReports();      
     });  
 
 });
@@ -26,7 +25,7 @@ using IHost host = builder.Build();
 
 // call the API to ensure all services are properly registered and initialized, and to trigger any potential initialization issues early in the application lifecycle.
 var membershipApi = host.Services.GetRequiredService<IMembershipApi>(); // Resolve the API to ensure all services are properly registered and initialized.
-await membershipApi.PrepareMembership(Guid.NewGuid(), "Premium"); // Test the API to trigger any potential initialization issues.
+await membershipApi.PrepareMembership(Guid.NewGuid(), "Premium", "Special"); // Test the API to trigger any potential initialization issues.
 
 Console.WriteLine($"[{DateTime.UtcNow:O}] Host built. Starting application lifecycle.");
 

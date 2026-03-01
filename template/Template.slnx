@@ -6,14 +6,6 @@
     <Project Path="src/modules/Module.MyFirstModule.Api/Module.MyFirstModule.Api.csproj" />
     <Project Path="src/modules/Module.MyFirstModule/Module.MyFirstModule.csproj" />
   </Folder>
-  <Folder Name="/src/Modules/MySecondModule/">
-    <Project Path="src/modules/Module.MySecondModule.Api/Module.MySecondModule.Api.csproj" />
-    <Project Path="src/modules/Module.MySecondModule/Module.MySecondModule.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/MyThirdModule/">
-    <Project Path="src/modules/Module.MyThirdModule.Api/Module.MyThirdModule.Api.csproj" />
-    <Project Path="src/modules/Module.MyThirdModule/Module.MyThirdModule.csproj" />
-  </Folder>
   <Folder Name="/src/Root/">
     <Project Path="src/Host/Template.Console/Template.Console.csproj" />
   </Folder>
@@ -22,7 +14,5 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Module.MyFirstModule.Tests/Module.MyFirstModule.Tests.csproj" />
-    <Project Path="tests/Module.MySecondModule.Tests/Module.MySecondModule.Tests.csproj" />
-    <Project Path="tests/Module.MyThirdModule.Tests/Module.MyThirdModule.Tests.csproj" />
   </Folder>
 </Solution>
